@@ -30,7 +30,7 @@
 		"autoprefixer": "^10.4.16",
 		"eslint": "^8.46.0",
 		"eslint-config-prettier": "^8.5.0",
-		"eslint-plugin-svelte": "^2.33.2",
+		"eslint-plugin-svelte": "^2.40.0",
 		"flowbite-svelte": "^0.44.15",
 		"postcss": "^8.4.23",
 		"postcss-load-config": "^4.0.1",
