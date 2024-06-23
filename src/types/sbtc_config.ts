@@ -1,4 +1,4 @@
-import type { BridgeTransactionType, SbtcContractDataType, AddressObject, ExchangeRate, AuthorisationDataType, DepositPayloadUIType, WithdrawPayloadUIType } from 'sbtc-bridge-lib' 
+import type { AddressObject, AuthorisationDataType, BridgeTransactionType, DepositPayloadUIType, ExchangeRate, SbtcContractDataType, WithdrawPayloadUIType } from "@mijoco/stx_helpers/dist/index";
 
 export type SbtcConfig = {
   exchangeRates?: Array<ExchangeRate>;

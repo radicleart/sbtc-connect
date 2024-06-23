@@ -1,10 +1,8 @@
 // see https://medium.com/coinmonks/merkle-tree-a-simple-explanation-and-implementation-48903442bc08#:~:text=The%20use%20of%20Merkle%20Tree,block%20or%20the%20whole%20blockchain.
 import { hex } from '@scure/base';
-import * as P from 'micro-packed';
+import { concatBytes } from '@stacks/common';
 import { sha256 } from '@noble/hashes/sha256';
-import type { TxMinedParameters } from 'sbtc-bridge-lib';
-
-const concat = P.concatBytes;
+import type { TxMinedParameters } from '@mijoco/stx_helpers/dist/index';
 
 const LEFT = 'left';
 const RIGHT = 'right';
@@ -61,14 +59,14 @@ export const doubleSha = (valueToBeHashed: string):Uint8Array => {
 };
 
 export const hashPairReverse = (a:string, b:string):string => {
-	const bytes = concat(hex.decode(a).reverse(), hex.decode(b).reverse());
+	const bytes = concatBytes(hex.decode(a).reverse(), hex.decode(b).reverse());
   const hashedBytes = sha256(sha256(bytes))
   const pair = hex.encode(hashedBytes.reverse());
   return pair;
 };
 
 export const hashPair = (a:string, b:string):string => {
-	const bytes = concat(hex.decode(a), hex.decode(b));
+	const bytes = concatBytes(hex.decode(a), hex.decode(b));
   const hashedBytes = sha256(sha256(bytes))
   const pair = hex.encode(hashedBytes);
   return pair;

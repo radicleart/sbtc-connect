@@ -2,10 +2,9 @@
 import { onMount } from 'svelte';
 import { tsToDate } from '$lib/utils'
 import * as btc from '@scure/btc-signer';
-import type { BridgeTransactionType } from 'sbtc-bridge-lib' 
-import { parseDepositPayload } from 'sbtc-bridge-lib' 
 import TxExport from './TxExport.svelte';
 import { sbtcConfig } from '$stores/stores'
+	import { parseDepositPayload, type BridgeTransactionType } from '@mijoco/stx_helpers/dist/index';
 
 export let peginRequest:BridgeTransactionType;
 export let reclaimBtcTx:btc.Transaction;
@@ -34,7 +33,7 @@ onMount(() => {
       count++;
     }
     const amt = (peginRequest.vout && peginRequest.vout.value) ? peginRequest.vout.value : peginRequest.uiPayload.amountSats;
-    stacksData = parseDepositPayload(revealScript[0].valueOf() as Uint8Array, amt);
+    stacksData = parseDepositPayload(revealScript[0].valueOf() as Uint8Array);
   } catch(err) {
     console.log(err)
   }

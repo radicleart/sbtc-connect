@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { fmtNumber, satsToBitcoin, truncate } from 'sbtc-bridge-lib';
 	import ArrowUpRight from '../shared/ArrowUpRight.svelte';
-	import { explorerBtcTxUrl, explorerTxUrl } from '$lib/utils';
+	import { explorerBtcTxUrl, explorerTxUrl, fmtNumber, satsToBitcoin, truncate } from '$lib/utils';
 
     export let event:any;
 

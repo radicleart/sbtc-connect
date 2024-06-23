@@ -1,12 +1,10 @@
-import { CONFIG } from '$lib/config';
+import { getConfig } from '$stores/store_helpers';
 import * as btc from '@scure/btc-signer';
 import * as secp from '@noble/secp256k1';
-import { parseDepositPayload, type AddressMempoolObject, type PayloadType, type SbtcClarityEvent, getAddressFromOutScript, parseWithdrawPayload, MAGIC_BYTES_TESTNET, MAGIC_BYTES_MAINNET } from 'sbtc-bridge-lib'
-import type { BridgeTransactionType } from 'sbtc-bridge-lib'
 import { hex } from '@scure/base';
 import { hash160 } from '@stacks/transactions';
 import { hashSha256Sync } from '@stacks/encryption';
-import { RevealerTxModes, type CommitmentStatus, RevealerTxTypes } from '$types/revealer_types';
+import { CommitmentStatus, MAGIC_BYTES_MAINNET, MAGIC_BYTES_TESTNET, RevealerTxModes, RevealerTxTypes, type AddressMempoolObject, type SbtcClarityEvent } from '@mijoco/stx_helpers/dist/index';
 
 export const COMMS_ERROR = 'Error communicating with the server. Please try later.'
 export const smbp = 900
@@ -73,7 +71,7 @@ export function tsToDate(updated:number|undefined) {
 }
 
 export function isSupported(address:string) {
-  const network = CONFIG.VITE_NETWORK;
+  const network = getConfig().VITE_NETWORK;
   const msg = 'Please enter a valid ' + network + ' bitcoin address.'
   if (!address || address.length < 10) {
     throw new Error(msg);
@@ -105,26 +103,26 @@ export function isSupported(address:string) {
 }
 
 export function getNet() {
-  return (CONFIG.VITE_NETWORK === 'testnet') ? btc.TEST_NETWORK : btc.NETWORK
+  return (getConfig().VITE_NETWORK === 'testnet') ? btc.TEST_NETWORK : btc.NETWORK
   //if (network === 'litecoin') return { pubKeyHash: 0x30, scriptHash: 0x32 };
   //if (network === 'testnet') return { bech32: 'tb', pubKeyHash: 0x6f, scriptHash: 0xc4 };
   //if (network === 'regtest') return { bech32: 'bcrt', pubKeyHash: 0x6f, scriptHash: 0xc4 };
 }
 export function explorerAddressUrl(addr:string) {
-	return CONFIG.VITE_STACKS_EXPLORER + '/address/' + addr + '?chain=' + CONFIG.VITE_NETWORK;
+	return getConfig().VITE_STACKS_EXPLORER + '/address/' + addr + '?chain=' + getConfig().VITE_NETWORK;
 }
 export function explorerBtcTxUrl(txid:string|undefined) {
   if (!txid) return '?';
   if (txid.startsWith('0x')) txid = txid.split('x')[1]
-	return CONFIG.VITE_BSTREAM_EXPLORER + '/tx/' + txid;
+	return getConfig().VITE_BSTREAM_EXPLORER + '/tx/' + txid;
 }
 
 export function explorerBtcAddressUrl(address:string|undefined) {
   if (!address) return ''
-	return CONFIG.VITE_BSTREAM_EXPLORER + '/address/' + address;
+	return getConfig().VITE_BSTREAM_EXPLORER + '/address/' + address;
 }
 export function explorerTxUrl(txid:string) {
-	return CONFIG.VITE_STACKS_EXPLORER + '/txid/' + txid + '?chain=' + CONFIG.VITE_NETWORK;
+	return getConfig().VITE_STACKS_EXPLORER + '/txid/' + txid + '?chain=' + getConfig().VITE_NETWORK;
 }
 
 export function bitcoinBalanceFromMempool(addressMempoolObject:AddressMempoolObject|undefined) {
@@ -226,7 +224,7 @@ export function getModeAsWord (mode:RevealerTxModes) {
 
 
 export function getAddressFromHashBytes(hashBytes:string, version:string) {
-	const net = (CONFIG.VITE_NETWORK === 'testnet') ? btc.TEST_NETWORK : btc.NETWORK
+	const net = (getConfig().VITE_NETWORK === 'testnet') ? btc.TEST_NETWORK : btc.NETWORK
 	if (!version.startsWith('0x')) version = '0x' + version
 	if (!hashBytes.startsWith('0x')) hashBytes = '0x' + hashBytes
 	let btcAddr:string|undefined;
@@ -255,7 +253,7 @@ export function getAddressFromHashBytes(hashBytes:string, version:string) {
 }
   
 export function getHashBytesFromAddress(address:string):{version:string, hashBytes:string }|undefined {
-	const net = (CONFIG.VITE_NETWORK === 'testnet') ? btc.TEST_NETWORK : btc.NETWORK
+	const net = (getConfig().VITE_NETWORK === 'testnet') ? btc.TEST_NETWORK : btc.NETWORK
 	try {
 	  const addr:any = btc.Address(net);
 	  //const outScript = btc.OutScript.encode(addr.decode(address));

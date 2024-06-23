@@ -3,15 +3,15 @@
   import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
 
   import { page } from '$app/stores';
-  import { COMMS_ERROR, explorerTxUrl } from '$lib/utils.js'
+  import { COMMS_ERROR, explorerTxUrl, fmtNumber } from '$lib/utils.js'
   import { truncate, explorerBtcTxUrl } from '$lib/utils'
   import { findSbtcEventByBitcoinAddress, findSbtcEventsByPage } from '$lib/events_api'
-  import { fmtNumber, type SbtcClarityEvent } from 'sbtc-bridge-lib'
   import { satsToBitcoin } from '$lib/utils'
   import ArrowUpRight from '$lib/components/shared/ArrowUpRight.svelte';
   import Paging from '$lib/components/sbtc-events/Paging.svelte';
   import { sbtcConfig } from '$stores/stores';
-  import { CONFIG } from '$lib/config';
+  import { getConfig } from '$stores/store_helpers';
+	import type { SbtcClarityEvent } from '@mijoco/stx_helpers/dist/index';
 
   // fetch/hydrate data from local storage
   let inited = false;
@@ -45,7 +45,7 @@
   }
 
   const fetchMine = async () => {
-    const mySbtcEvents = await findSbtcEventByBitcoinAddress($sbtcConfig.keySets[CONFIG.VITE_NETWORK].cardinal)
+    const mySbtcEvents = await findSbtcEventByBitcoinAddress($sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinal)
     sbtcEvents.results = mySbtcEvents
     sbtcEvents.events = mySbtcEvents.length
   }

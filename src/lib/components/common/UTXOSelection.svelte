@@ -2,7 +2,7 @@
 import { createEventDispatcher } from "svelte";
 import { isSupported } from "$lib/utils";
 import { onMount } from 'svelte';
-import { CONFIG } from '$lib/config';
+import { getConfig } from '$stores/store_helpers';
 import { truncate, explorerBtcTxUrl, explorerTxUrl } from '$lib/utils'
 import { sbtcConfig } from '$stores/stores';
 
@@ -24,12 +24,12 @@ let showUtxos:boolean;
 let showDebugInfo = $sbtcConfig.userSettings.debugMode;
 
 const useWebWallet = async () => {
-  bitcoinAddress = $sbtcConfig.keySets[CONFIG.VITE_NETWORK].cardinal;
+  bitcoinAddress = $sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinal;
   configureUTXOs(true);
 }
 
 const isWebWallet = async () => {
-  return (bitcoinAddress === $sbtcConfig.keySets[CONFIG.VITE_NETWORK].cardinal);
+  return (bitcoinAddress === $sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinal);
 }
 
 const configureUTXOs = async (force:boolean) => {
@@ -38,7 +38,7 @@ const configureUTXOs = async (force:boolean) => {
   try {
     isSupported(bitcoinAddress);
   } catch (err:any) {
-    //bitcoinAddress = $sbtcConfig.keySets[CONFIG.VITE_NETWORK].cardinal;
+    //bitcoinAddress = $sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinal;
     errorReason = 'Unsupported bitcoin address - the reclaim feature currently requires a taproot (segwit v1) bitcoin addresses.';
     return;
   }

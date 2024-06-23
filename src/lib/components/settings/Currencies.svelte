@@ -2,10 +2,10 @@
 	import { onMount } from 'svelte';
 	import { sbtcConfig } from '$stores/stores';
 	import type { SbtcConfig } from '$types/sbtc_config';
-  import type { ExchangeRate } from 'sbtc-bridge-lib';
   import { compareCurrencies } from '$lib/utils'
 	import { CheckCircle, ChevronDown, Icon } from "svelte-hero-icons"
   import { Button, Dropdown, DropdownItem } from 'flowbite-svelte';
+	import type { ExchangeRate } from '@mijoco/stx_helpers/dist/index';
 
   let myCurrency:ExchangeRate;
   let selected:string|undefined;

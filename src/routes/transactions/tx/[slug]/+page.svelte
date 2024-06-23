@@ -4,7 +4,7 @@ import { goto } from "$app/navigation";
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { fetchRevealerTransactionsByTxId } from '$lib/revealer_api';
 	import { page } from '$app/stores';
-	import type { RevealerTransaction } from '$types/revealer_types';
+	import type { RevealerTransaction } from '@mijoco/stx_helpers/dist/index';
 
 let transaction:RevealerTransaction;
 

@@ -5,13 +5,12 @@ import { callContractReadOnly, isCoordinator, romeoMintTo, romeoWithdrawTo } fro
 import { hex } from '@scure/base';
 import { onMount } from 'svelte';
 import { sha256 } from '@noble/hashes/sha256';
-import { explorerAddressUrl } from '$lib/utils';
+import { bitcoinToSats, explorerAddressUrl } from '$lib/utils';
 import { sbtcConfig } from '$stores/stores'
-import { CONFIG } from '$lib/config';
-import { loggedIn } from '$lib/stacks_connect';
-	import { bitcoinToSats, parsePayloadFromTransaction, type PayloadType, type TxMinedParameters } from 'sbtc-bridge-lib';
+import { getConfig } from '$stores/store_helpers';
 	import { generateMerkleRoot, generateMerkleTree, getParametersForProof } from '$lib/merkle_utils';
 	import { payloadParseTransaction } from '$lib/revealer_api';
+	import { isLoggedIn, type PayloadType, type TxMinedParameters } from '@mijoco/stx_helpers/dist/index';
 /**
 proofs = (
 0x268c873b99d12a8ea0c87e05de4ac98b16398217abc97f79b94bd9bea35a5ce6 
@@ -39,7 +38,7 @@ let allowBurn = false;
 let amount = 0
 let contractParameters:any;
 let contract = 'ST1R1061ZT6KPJXQ7PAXPFB6ZAZ6ZWW28G8HXK9G5.clarity-bitcoin-mini-1'
-if (CONFIG.VITE_NETWORK === 'devnet') contract = 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.clarity-bitcoin-mini-1'
+if (getConfig().VITE_NETWORK === 'devnet') contract = 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.clarity-bitcoin-mini-1'
 let stxAddress:string|undefined;
 let merkleTree:Array<Array<string>>
 let parameters:TxMinedParameters;
@@ -52,7 +51,7 @@ let merkleRootCheck = false;
 let inited = false;
 let functionName:string;
 
-const coordinator = (loggedIn() && $sbtcConfig.keySets[CONFIG.VITE_NETWORK]) ? isCoordinator($sbtcConfig.keySets[CONFIG.VITE_NETWORK].stxAddress) : undefined;
+const coordinator = (isLoggedIn() && $sbtcConfig.keySets[getConfig().VITE_NETWORK]) ? isCoordinator($sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress) : undefined;
 
 const getProofTuple = function () {
   const entryList = [];
@@ -177,7 +176,7 @@ const verifyMerkleProof = async () => {
 }
 
 const mintTo = async () => {
-  //const dataPayload = parsePayloadFromTransaction(CONFIG.VITE_NETWORK, tx.hex)
+  //const dataPayload = parsePayloadFromTransaction(getConfig().VITE_NETWORK, tx.hex)
   let prin = data.stacksAddress;
   if (typeof (data.lengthOfCname) === 'number' && data.lengthOfCname > 0) prin += '.' + data.cname
   contractParameters = {
@@ -193,7 +192,7 @@ const mintTo = async () => {
 }
 
 const withdrawTo = async () => {
-  //const dataPayload = parsePayloadFromTransaction(CONFIG.VITE_NETWORK, tx.hex)
+  //const dataPayload = parsePayloadFromTransaction(getConfig().VITE_NETWORK, tx.hex)
   let prin = data.stacksAddress;
   if (typeof (data.lengthOfCname) === 'number' && data.lengthOfCname > 0) prin += '.' + data.cname
   contractParameters = {
@@ -231,7 +230,7 @@ onMount(async () => {
 
   proofString = parameters.proofElements.map(({ hash }) => hash).join(' ')
   amount = bitcoinToSats(tx.vout[1].value)
-  stxAddress = $sbtcConfig.keySets[CONFIG.VITE_NETWORK].stxAddress
+  stxAddress = $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress
   answer = undefined
   inited = true;
 })

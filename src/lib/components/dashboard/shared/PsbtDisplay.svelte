@@ -2,7 +2,7 @@
 import { onMount } from 'svelte';
 import { Tooltip } from 'flowbite-svelte';
 import { Icon, InformationCircle } from "svelte-hero-icons";
-	import type { PSBTHolder } from '$types/revealer_types';
+	import type { PSBTHolder } from '@mijoco/stx_helpers/dist/index';
 
 export let psbtHolder:PSBTHolder;
 let showHex = true;

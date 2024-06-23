@@ -1,16 +1,15 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Skeleton, Tabs, TabItem } from 'flowbite-svelte';
-
-  import { page } from '$app/stores';
   import { COMMS_ERROR } from '$lib/utils.js'
   import { findSbtcEventByBitcoinAddress, findSbtcEventsByPage } from '$lib/events_api'
   import { sbtcConfig } from '$stores/stores';
-  import { CONFIG } from '$lib/config';
-	import type { SbtcClarityEvent } from 'sbtc-bridge-lib';
+  import { getConfig } from '$stores/store_helpers';
 	import Event from '$lib/components/sbtc-events/Event.svelte';
 	import Paging from '$lib/components/sbtc-events/Paging.svelte';
 	import EventHeader from '$lib/components/sbtc-events/EventHeader.svelte';
+	import type { SbtcClarityEvent } from '@mijoco/stx_helpers/dist/index';
+	import { page } from '$app/stores';
+	import { Skeleton, TabItem, Tabs } from 'flowbite-svelte';
 
   // fetch/hydrate data from local storage
   let inited = false;
@@ -21,7 +20,7 @@
   let numPages = 0;
 
   const fetchMine = async () => {
-    const mySbtcEvents = await findSbtcEventByBitcoinAddress($sbtcConfig.keySets[CONFIG.VITE_NETWORK].cardinal)
+    const mySbtcEvents = await findSbtcEventByBitcoinAddress($sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinal)
     sbtcEvents.results = mySbtcEvents
     sbtcEvents.events = mySbtcEvents.length
     showAll = false

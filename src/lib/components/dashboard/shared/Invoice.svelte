@@ -7,12 +7,10 @@
   import LinkToExplorer from '$lib/components/shared/LinkToExplorer.svelte';
   import CopyClipboard from '$lib/components/common/CopyClipboard.svelte';
   import { makeFlash } from "$lib/stacks_connect";
-  import type { BridgeTransactionType } from 'sbtc-bridge-lib'
   import { truncate, explorerBtcAddressUrl } from '$lib/utils'
   import { sbtcConfig } from '$stores/stores'
-  import { CONFIG } from '$lib/config';
 	import PsbtDisplay from "$lib/components/dashboard/shared/PsbtDisplay.svelte";
-	import type { PSBTHolder } from "$types/revealer_types";
+	import type { PSBTHolder } from "@mijoco/stx_helpers/dist/index";
 
   //export let peginRequest:BridgeTransactionType;
   export let psbtHolder:PSBTHolder|undefined;

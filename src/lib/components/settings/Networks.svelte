@@ -2,17 +2,19 @@
 	import { onMount } from 'svelte';
 	import { Icon, InformationCircle } from "svelte-hero-icons"
 	import { Button } from 'flowbite-svelte'
-	import { CONFIG, setConfig } from '$lib/config';
+	import { setConfig } from '$lib/config';
 	import { sbtcConfig } from '$stores/stores';
 	import type { SbtcConfig } from '$types/sbtc_config';
 	import { fetchSbtcBalance } from '$lib/stacks_connect'
 	import Banner from '$lib/components/shared/Banner.svelte';
+	import { getConfig } from '$stores/store_helpers';
+	import { switchConfig } from '$stores/stores_config';
 
 	let mode = import.meta.env.MODE
     //if (!mode) mode = 'testnet'
 
 	const switchDevnet = async () => {
-		setConfig('devnet');
+		switchConfig('devnet');
 		await fetchSbtcBalance($sbtcConfig, true);
 		sbtcConfig.update((conf:SbtcConfig) => {
 			return conf;
@@ -27,7 +29,7 @@
 	}
 
 	const switchDevenv = async () => {
-		setConfig('devenv');
+		switchConfig('devnet');
 		await fetchSbtcBalance($sbtcConfig, true);
 		sbtcConfig.update((conf:SbtcConfig) => {
 			return conf;
@@ -38,7 +40,7 @@
 	}
 
 	const toggleNetwork = async () => {
-		let net = CONFIG.VITE_NETWORK;
+		let net = getConfig().VITE_NETWORK;
 		if (net === 'mainnet') net = 'testnet';
 		else net = 'mainnet'
 		setConfig(net);
@@ -66,7 +68,7 @@
   </p>
   <p class="text-white font-normal">
 		<span class="inline-flex bg-black rounded-xl text-white px-4 py-1 font-normal">
-      {CONFIG.VITE_ENVIRONMENT}
+      {getConfig().VITE_ENVIRONMENT}
     </span>
   </p>
   <div id="po-network" class="">
@@ -74,7 +76,7 @@
   </div>
 </div>
 
-{#if CONFIG.VITE_NETWORK === "testnet"}
+{#if getConfig().VITE_NETWORK === "testnet"}
 	<Banner
 		bannerType={'info'}
 		message={'Don\'t have testnet Bitcoin? <a class="underline" href="https://bitcoinfaucet.uo1.net/" target="_blank">Get some to get started!</a>'}

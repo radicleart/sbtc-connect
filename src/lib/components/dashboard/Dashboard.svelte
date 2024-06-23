@@ -1,14 +1,14 @@
 <script lang="ts">
   import { sbtcConfig } from '$stores/stores';
-	import { loggedIn, loginStacksFromHeader } from '$lib/stacks_connect';
-	import { CONFIG } from '$lib/config';
-	import { fmtNumber, fmtSatoshiToBitcoin, satsToBitcoin } from 'sbtc-bridge-lib';
+	import { getConfig } from '$stores/store_helpers';
+	import { fmtNumber, fmtSatoshiToBitcoin, satsToBitcoin } from '$lib/utils';
+	import { isLoggedIn, loginStacksFromHeader } from "@mijoco/stx_helpers/dist/index";
 
-  $: connected = loggedIn()
+  $: connected = isLoggedIn()
   let showFiat = true
 
   $: currentBalance = () => {
-    return fmtSatoshiToBitcoin($sbtcConfig.keySets[CONFIG.VITE_NETWORK].sBTCBalance || 0.00000000)
+    return fmtSatoshiToBitcoin($sbtcConfig.keySets[getConfig().VITE_NETWORK].sBTCBalance || 0.00000000)
   }
   const tvl = (showFiat:boolean) => {
     if (showFiat) {
@@ -23,7 +23,7 @@
 
 	const doLogin = async () => {
 		const res = await loginStacksFromHeader(document)
-    connected = loggedIn()
+    connected = isLoggedIn()
 	}
 
 </script>

@@ -2,8 +2,7 @@
 import { onMount } from 'svelte';
 import { tsToDate, explorerBtcTxUrl, explorerBtcAddressUrl } from '$lib/utils'
 import * as btc from '@scure/btc-signer';
-import type { BridgeTransactionType } from 'sbtc-bridge-lib' 
-import { parseDepositPayload } from 'sbtc-bridge-lib' 
+	import { parseDepositPayload, type BridgeTransactionType } from '@mijoco/stx_helpers/dist/index';
 
 export let peginRequest:BridgeTransactionType;
 let stacksData:any;
@@ -29,7 +28,7 @@ onMount(() => {
       count++;
     }
     const amt = (peginRequest.vout && peginRequest.vout.value) ? peginRequest.vout.value : peginRequest.uiPayload.amountSats;
-    stacksData = parseDepositPayload(revealScript[0].valueOf() as Uint8Array, amt);
+    stacksData = parseDepositPayload(revealScript[0].valueOf() as Uint8Array);
   } catch(err) {
     console.log(err)
   }
@@ -49,11 +48,11 @@ onMount(() => {
     <div class="col-md-2 col-sm-12 text-info">Sent from</div><div class="col-md-10 col-sm-12">{peginRequest.originator}</div>
     {#if peginRequest.status === 3}
     <div class="col-md-2 col-sm-12 text-info">Reclaimed</div><div class="col-md-10 col-sm-12">
-      <a href={explorerBtcTxUrl(peginRequest.reclaim?.btcTxid)} target="_blank" rel="noreferrer">{(peginRequest.reclaim?.btcTxid)}</a>
+      <a href={explorerBtcTxUrl(peginRequest.btcTxid)} target="_blank" rel="noreferrer">{(peginRequest.btcTxid)}</a>
     </div>
     {:else if peginRequest.status === 4}
     <div class="col-md-2 col-sm-12 text-info">Revealed</div><div class="col-md-10 col-sm-12">
-      <a href={explorerBtcTxUrl(peginRequest.reveal?.btcTxid)} target="_blank" rel="noreferrer">{(peginRequest.reveal?.btcTxid)}</a>
+      <a href={explorerBtcTxUrl(peginRequest.btcTxid)} target="_blank" rel="noreferrer">{(peginRequest.btcTxid)}</a>
     </div>
     {/if}
     {:else}

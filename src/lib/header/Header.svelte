@@ -4,23 +4,22 @@
 	import Brand from './Brand.svelte'
 	import { sbtcConfig } from '$stores/stores';
 	import { afterNavigate, goto } from "$app/navigation";
-	import { authenticate, initApplication, loginStacksJs } from '$lib/stacks_connect'
-	import { logUserOut, loggedIn } from '$lib/stacks_connect'
+	import { authenticate, initApplication } from '$lib/stacks_connect'
 	import { isCoordinator } from '$lib/sbtc_admin.js'
 	import AccountDropdown from './AccountDropdown.svelte'
 	import SettingsDropdown from './SettingsDropdown.svelte';
-	import { CONFIG } from '$lib/config';
-	import type { AddressObject, DepositPayloadUIType, WithdrawPayloadUIType } from 'sbtc-bridge-lib';
+	import { getConfig } from '$stores/store_helpers';
 	import { setAuthorisation } from '$lib/events_api';
 	import { disconnect } from '@stacks/connect';
+	import { isLoggedIn, logUserOut, loginStacksFromHeader, type AddressObject, type DepositPayloadUIType, type WithdrawPayloadUIType } from '@mijoco/stx_helpers/dist/index';
 
 	const dispatch = createEventDispatcher();
-	const coordinator = (loggedIn() && $sbtcConfig.keySets[CONFIG.VITE_NETWORK]) ? isCoordinator($sbtcConfig.keySets[CONFIG.VITE_NETWORK].stxAddress) : undefined;
+	const coordinator = (isLoggedIn() && $sbtcConfig.keySets[getConfig().VITE_NETWORK]) ? isCoordinator($sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress) : undefined;
 
 	const doLogin = async () => {
-		if (loggedIn()) doLogout()
+		if (isLoggedIn()) doLogout()
 		else {
-			await loginStacksJs(loginCallback, undefined);
+			await loginStacksFromHeader(document);
 		}
 	}
 	let componentKey = 0;
@@ -30,7 +29,7 @@
 
 	const loginCallback = async () => {
 		await initApplication($sbtcConfig, true)
-		if (loggedIn() && !$sbtcConfig.authHeader) {
+		if (isLoggedIn() && !$sbtcConfig.authHeader) {
 			await authenticate($sbtcConfig)
 		}
 		await setAuthorisation($sbtcConfig.authHeader)
@@ -45,7 +44,7 @@
 		$sbtcConfig.authHeader = undefined
 		$sbtcConfig.payloadDepositData = {} as DepositPayloadUIType
 		$sbtcConfig.payloadWithdrawData = {} as WithdrawPayloadUIType
-		$sbtcConfig.keySets[CONFIG.VITE_NETWORK] = {} as AddressObject;
+		$sbtcConfig.keySets[getConfig().VITE_NETWORK] = {} as AddressObject;
 		await sbtcConfig.update(() => $sbtcConfig)
 		dispatch('login_event');
 		disconnect()
@@ -64,7 +63,6 @@
 
 <Navbar
 	class="mx-auto flex max-w-7xl items-center !px-6 lg:px-8 !bg-transparent"
-	navDivClass="mx-auto flex flex-wrap justify-between items-center"
 	let:hidden
 	let:toggle
 	fluid={true}
@@ -77,7 +75,7 @@
   <div class="hidden md:flex md:gap-2 md:order-3">
 		<SettingsDropdown />
 
-		{#if loggedIn()}
+		{#if isLoggedIn()}
 			<AccountDropdown on:init_logout={() => doLogout()}/>
 		{:else}
 			<button class="inline-flex items-center gap-x-1.5 bg-primary-01 px-4 py-2 font-normal text-black rounded-lg border border-primary-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500/50 shrink-0" on:keydown on:click={doLogin}>
@@ -118,7 +116,7 @@
 
 		<NavLi nonActiveClass="md:hidden"><SettingsDropdown /></NavLi>
 		<NavLi nonActiveClass="md:hidden ml-0 md:ml-2">
-			{#if loggedIn()}
+			{#if isLoggedIn()}
 				<AccountDropdown on:init_logout={() => doLogout()}/>
 			{:else}
 				<button id="connect-wallet" class="block w-full items-center gap-x-1.5 bg-primary-01 px-4 py-2 font-normal text-black rounded-lg border border-primary-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500/50" on:keydown on:click={doLogin}>

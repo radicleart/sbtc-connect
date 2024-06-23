@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import Invoice from '$lib/components/dashboard/shared/Invoice.svelte';
-	import type { PSBTHolder } from '$types/revealer_types';
+	import type { PSBTHolder } from '@mijoco/stx_helpers/dist/index';
 
   export let psbtHolder:PSBTHolder|undefined;
   export let amountSats:number;

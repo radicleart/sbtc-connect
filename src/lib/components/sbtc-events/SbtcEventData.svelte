@@ -1,11 +1,11 @@
 <script lang="ts">
-import { explorerBtcAddressUrl, explorerBtcTxUrl, explorerTxUrl } from '$lib/utils';
-import { fmtNumber, satsToBitcoin, truncate, type SbtcClarityEvent, getAddressFromOutScript } from 'sbtc-bridge-lib';
+import { explorerBtcAddressUrl, explorerBtcTxUrl, explorerTxUrl, fmtNumber, satsToBitcoin } from '$lib/utils';
 import { onMount } from 'svelte';
 import * as btc from '@scure/btc-signer';
 import { hex } from '@scure/base';
 import { fetchAddressTransactions, fetchTransaction, parseFulfilPayloadFromOutput } from '$lib/events_api';
-	import { CONFIG } from '$lib/config';
+	import { getConfig } from '$stores/store_helpers';
+	import { getAddressFromOutScript, type SbtcClarityEvent } from '@mijoco/stx_helpers/dist/index';
 
 export let sbtcEvent:SbtcClarityEvent;
 let bitcoinTxId:string;
@@ -21,7 +21,7 @@ const getFulfil = async () => {
     if (sbtcEvent.payloadData.eventType === 'burn') {
       const txIn = await fetchTransaction(sbtcEvent.bitcoinTxid.payload.value.split('x')[1])
       const tx:btc.Transaction = btc.Transaction.fromRaw(hex.decode(txIn.hex), {allowUnknowInput:true, allowUnknowOutput: true, allowUnknownOutputs: true, allowUnknownInputs: true})
-      recipient = getAddressFromOutScript(CONFIG.VITE_NETWORK, tx.getOutput(1).script as Uint8Array)
+      recipient = getAddressFromOutScript(getConfig().VITE_NETWORK, tx.getOutput(1).script as Uint8Array)
       amount = Number(tx.getOutput(1).amount)
       const txs:Array<any> = await fetchAddressTransactions(recipient);
       let fulfilTx:any;
@@ -30,7 +30,7 @@ const getFulfil = async () => {
         if (vout0.scriptpubkey_type === 'op_return' && (vout0.scriptpubkey.indexOf('543221') > -1 || vout0.scriptpubkey.indexOf('583221') > -1)) {
           const txHex = await fetchTransaction(thisTx.txid)
           const tx:btc.Transaction = btc.Transaction.fromRaw(hex.decode(txHex.hex), {allowUnknowInput:true, allowUnknowOutput: true, allowUnknownOutputs: true, allowUnknownInputs: true})
-          parseFulfilPayloadFromOutput(CONFIG.VITE_NETWORK, tx)
+          parseFulfilPayloadFromOutput(getConfig().VITE_NETWORK, tx)
           const vout1 = thisTx.vout[1]
         }
       }

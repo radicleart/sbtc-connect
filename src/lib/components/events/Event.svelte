@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { satsToBitcoin, truncate } from 'sbtc-bridge-lib';
 	import ArrowUpRight from '../shared/ArrowUpRight.svelte';
-	import { explorerBtcTxUrl, explorerTxUrl } from '$lib/utils';
+	import { explorerBtcTxUrl, explorerTxUrl, satsToBitcoin, truncate } from '$lib/utils';
 	import { onMount } from 'svelte';
-	import { RevealerTxTypes, type RevealerTransaction } from '$types/revealer_types';
+	import { RevealerTxTypes, type RevealerTransaction } from '@mijoco/stx_helpers/dist/index';
 
     export let event:RevealerTransaction;
 

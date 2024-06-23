@@ -4,12 +4,12 @@
   import { page } from '$app/stores';
   import { COMMS_ERROR } from '$lib/utils.js'
   import { sbtcConfig } from '$stores/stores';
-  import { CONFIG } from '$lib/config';
+  import { getConfig } from '$stores/store_helpers';
 	import Event from '$lib/components/events/Event.svelte';
 	import Paging from '$lib/components/events/Paging.svelte';
 	import EventHeader from '$lib/components/transactions/TransactionHeader.svelte';
 	import { fetchRevealerTransactions, fetchRevealerTransactionsByOriginator } from '$lib/revealer_api';
-	import type { RevealerTransaction } from '$types/revealer_types';
+	import type { RevealerTransaction } from '@mijoco/stx_helpers/dist/index';
 	import { goto } from '$app/navigation';
 
   export let mode:string;
@@ -19,7 +19,7 @@
   let showAll:boolean = true;
   const limit = 20;
   let numPages = 0;
-  let stxAddress = $sbtcConfig.keySets[CONFIG.VITE_NETWORK].stxAddress
+  let stxAddress = $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress
   let total = 0;
 
   const fetchPage = async (evt:any) => {
@@ -33,7 +33,7 @@
     if (mode === 'all') {
       transactions = await fetchRevealerTransactions(mypage, limit) //(mypage, limit)
     } else {
-      transactions = await fetchRevealerTransactionsByOriginator($sbtcConfig.keySets[CONFIG.VITE_NETWORK].stxAddress, 0, 100) //(mypage, limit)
+      transactions = await fetchRevealerTransactionsByOriginator($sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress, 0, 100) //(mypage, limit)
     }
 
     const resid = ((total % limit) > 0) ? 1 : 0;

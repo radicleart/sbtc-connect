@@ -1,8 +1,8 @@
 <script lang="ts">
 import { onMount } from 'svelte';
 import { goto } from "$app/navigation";
-import type { SbtcClarityEvent } from 'sbtc-bridge-lib'
 import SbtcEventData from '$lib/components/sbtc-events/SbtcEventData.svelte';
+	import type { SbtcClarityEvent } from '@mijoco/stx_helpers/dist/index';
 
 export let data:any;
 let sbtcEvent:SbtcClarityEvent = data;

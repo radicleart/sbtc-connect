@@ -6,27 +6,27 @@ import * as btc from '@scure/btc-signer';
 import { openPsbtRequestPopup } from '@stacks/connect'
 import { sbtcConfig } from '$stores/stores';
 import { explorerBtcTxUrl } from "$lib/utils";
-import { appDetails, getStacksNetwork, isLeather } from "$lib/stacks_connect";
+import { appDetails, isLeather } from "$lib/stacks_connect";
 import Invoice from '../shared/Invoice.svelte';
-import { CONFIG } from '$lib/config';
+import { getConfig } from '$stores/store_helpers';
 import { isHiro } from '$lib/stacks_connect'
 import { BitcoinNetworkType, signTransaction, type SignTransactionOptions } from 'sats-connect'
-import type { Transaction, TransactionOutput, TransactionInput } from '@scure/btc-signer';
 import { Tooltip } from 'flowbite-svelte';
 import Banner from '$lib/components/shared/Banner.svelte';
 import { broadcastDeposit, getPsbtForWithdrawal } from '$lib/revealer_api';
-import type { PSBTHolder } from '$types/revealer_types';
+	import { getStacksNetwork, type PSBTHolder } from '@mijoco/stx_helpers/dist/index';
+	import type { TransactionInput, TransactionOutput } from '@scure/btc-signer/psbt';
 
 export let withdrawalRecipient:string;
 export let withdrawalAmountSats:number;
 export let withdrawalSignature:string;
-let paymentAddress = $sbtcConfig.keySets[CONFIG.VITE_NETWORK].cardinal;
-let paymentPublicKey = $sbtcConfig.keySets[CONFIG.VITE_NETWORK].btcPubkeySegwit0!;
-let originator = $sbtcConfig.keySets[CONFIG.VITE_NETWORK].stxAddress;
+let paymentAddress = $sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinal;
+let paymentPublicKey = $sbtcConfig.keySets[getConfig().VITE_NETWORK].btcPubkeySegwit0!;
+let originator = $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress;
 
 const dispatch = createEventDispatcher();
 let psbtHolder:PSBTHolder;
-let transaction:Transaction;
+let transaction:btc.Transaction;
 let errorReason: string|undefined;
 let inited = false;
 let feeMultiplier = 1;
@@ -43,7 +43,7 @@ const getExplorerUrl = () => {
 }
 
 export function isWalletAddress() {
-  return withdrawalRecipient === $sbtcConfig.keySets[CONFIG.VITE_NETWORK].cardinal
+  return withdrawalRecipient === $sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinal
 }
 
 export async function requestSignPsbt() {
@@ -58,7 +58,7 @@ export async function requestSignPsbt() {
 
 const getBbMessage = () => {
   let msg = '<p>View transaction on the <a class="text-black underline" href=' + getExplorerUrl() + ' target="_blank" rel="noreferrer">Bitcoin network</a>.</p>'
-  msg += '<p>Once confirmed your sBTC will be withdrawn from your Stacks Account and your Bitcoin returned - <a href="/transactions/' + $sbtcConfig.keySets[CONFIG.VITE_NETWORK].stxAddress + '">keep track here</a>. </p>'
+  msg += '<p>Once confirmed your sBTC will be withdrawn from your Stacks Account and your Bitcoin returned - <a href="/transactions/' + $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress + '">keep track here</a>. </p>'
   return msg
 }
 
@@ -78,7 +78,7 @@ export async function signPsbtHiro() {
   });
 }
 function getPsbtTxOutputs() {
-  const psbtTx:Transaction = btc.Transaction.fromRaw(hex.decode(psbtHolder.hexPSBT), {allowUnknowInput:true, allowUnknowOutput: true, allowUnknownOutputs: true, allowUnknownInputs: true})
+  const psbtTx:btc.Transaction = btc.Transaction.fromRaw(hex.decode(psbtHolder.hexPSBT), {allowUnknowInput:true, allowUnknowOutput: true, allowUnknownOutputs: true, allowUnknownInputs: true})
   const outputsLength = psbtTx.outputsLength;
   const outputs:TransactionOutput[] = [];
   if (outputsLength === 0) return outputs;
@@ -88,7 +88,7 @@ function getPsbtTxOutputs() {
   return outputs;
 }
 function getPsbtTxInputs() {
-  const psbtTx:Transaction = btc.Transaction.fromRaw(hex.decode(psbtHolder.hexPSBT), {allowUnknowInput:true, allowUnknowOutput: true, allowUnknownOutputs: true, allowUnknownInputs: true})
+  const psbtTx:btc.Transaction = btc.Transaction.fromRaw(hex.decode(psbtHolder.hexPSBT), {allowUnknowInput:true, allowUnknowOutput: true, allowUnknownOutputs: true, allowUnknownInputs: true})
   const inputsLength = psbtTx.inputsLength;
   const inputs:TransactionInput[] = [];
   if (inputsLength === 0) return inputs;
@@ -111,7 +111,7 @@ export async function signPsbtXverse() {
   const signPsbtOptions:SignTransactionOptions = {
     payload: {
       network: {
-        type: (getStacksNetwork().isMainnet()) ? BitcoinNetworkType.Mainnet : BitcoinNetworkType.Testnet
+        type: (getStacksNetwork(getConfig().VITE_NETWORK).isMainnet()) ? BitcoinNetworkType.Mainnet : BitcoinNetworkType.Testnet
       },
       message: 'Sign Transaction',
       psbtBase64: b64Tx,

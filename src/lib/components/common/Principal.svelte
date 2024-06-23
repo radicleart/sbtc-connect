@@ -1,11 +1,11 @@
 <script lang="ts">
-import { CONFIG } from '$lib/config';
+import { getConfig } from '$stores/store_helpers';
 import { createEventDispatcher } from "svelte";
 import { sbtcConfig } from '$stores/stores';
 
 export let principalData:{ label:string, info:string, currentAddress:string|undefined };
 
-const network = CONFIG.VITE_NETWORK;
+const network = getConfig().VITE_NETWORK;
 const dispatch = createEventDispatcher();
 let stxAddress:string|undefined = principalData.currentAddress;
 const mainReason = 'Please enter a valid stacks blockchain ' + network + ' address';
@@ -34,8 +34,8 @@ const changeStxAddress = async () => {
     <input type="text" id="from-address" class="form-control form-inline" autocomplete="off" bind:value={stxAddress} on:input={() => changeStxAddress()} />
     <div class="d-flex justify-content-between text-small text-info">
       <div class="text-small text-white">{principalData.info}</div>
-      {#if stxAddress !== $sbtcConfig.keySets[CONFIG.VITE_NETWORK].stxAddress}
-      <div><a href="/" class="" on:click|preventDefault={() => { stxAddress = $sbtcConfig.keySets[CONFIG.VITE_NETWORK].stxAddress; changeStxAddress() }}>mine</a></div>
+      {#if stxAddress !== $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress}
+      <div><a href="/" class="" on:click|preventDefault={() => { stxAddress = $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress; changeStxAddress() }}>mine</a></div>
       {/if}
     </div>
     {#if errored && stxAddress && stxAddress.length > 0}<div class="text-warning">{reason}</div>{/if}

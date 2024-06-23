@@ -3,18 +3,18 @@
 	import "../sbtc.css";
 	import Header from "$lib/header/Header.svelte";
 	import Footer from "$lib/header/Footer.svelte";
-	import { initApplication, isLegal, loggedIn, authenticate, loginStacksFromHeader } from "$lib/stacks_connect";
-	import { CONFIG, setConfig } from '$lib/config';
+	import { setConfig } from '$lib/config';
 	import { afterNavigate, beforeNavigate, goto } from "$app/navigation";
 	import { page } from "$app/stores";
 	import { onMount, onDestroy } from 'svelte';
 	import { sbtcConfig } from '$stores/stores'
-    import { authConfig } from '$stores/authConfig'
 	import type { SbtcConfig } from '$types/sbtc_config'
 	import { defaultSbtcConfig } from '$types/sbtc_config';
-	import { COMMS_ERROR, tsToDate, tsToTime } from '$lib/utils.js'
+	import { COMMS_ERROR, tsToTime } from '$lib/utils.js'
 	import { setAuthorisation } from '$lib/events_api';
-	import type { AddressObject } from 'sbtc-bridge-lib';
+	import { getConfig } from '$stores/store_helpers';
+	import { isLoggedIn, loginStacksFromHeader, type AddressObject } from '@mijoco/stx_helpers/dist/index';
+	import { authenticate, initApplication, isLegal } from '$lib/stacks_connect';
 
 	let componentKey = 0;
 	let componentKey1 = 0;
@@ -61,7 +61,7 @@
 
 	const initApp = async () => {
 		await initApplication(($sbtcConfig) ? $sbtcConfig : defaultSbtcConfig as SbtcConfig, undefined);
-		if (loggedIn() && !$sbtcConfig.authHeader) {
+		if (isLoggedIn() && !$sbtcConfig.authHeader) {
 			await authenticate($sbtcConfig)
 		}
 		setAuthorisation($sbtcConfig.authHeader)
@@ -84,14 +84,14 @@
 		try {
 			const conf = $sbtcConfig;
 			if (!conf.keySets) {
-				if (CONFIG.VITE_NETWORK === 'testnet') {
+				if (getConfig().VITE_NETWORK === 'testnet') {
 					conf.keySets = { 'testnet': {} as AddressObject };
-				} else if (CONFIG.VITE_NETWORK === 'devnet') {
+				} else if (getConfig().VITE_NETWORK === 'devnet') {
 					conf.keySets = { 'testnet': {} as AddressObject };
 				} else {
 					conf.keySets = { 'mainnet': {} as AddressObject };
 				}
-				conf.keySets[CONFIG.VITE_NETWORK] = {} as AddressObject;
+				conf.keySets[getConfig().VITE_NETWORK] = {} as AddressObject;
 				sbtcConfig.update(() => conf);
 			}
 			inited = true;

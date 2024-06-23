@@ -1,7 +1,8 @@
-import { CONFIG } from '$lib/config';
-import { getAddressFromOutScript, parseDepositPayload, parseWithdrawPayload, type WrappedPSBT } from 'sbtc-bridge-lib' 
-import type { SbtcClarityEvent } from 'sbtc-bridge-lib/dist/types/sbtc_types';
+import { getConfig } from '$stores/store_helpers';
+import { getAddressFromOutScript, parseDepositPayload, parseWithdrawPayload, type PayloadType, type SbtcClarityEvent, type WrappedPSBT } from '@mijoco/stx_helpers/dist/index';
 import { getMagicAndOpCode } from './utils';
+import * as btc from '@scure/btc-signer';
+import { hex } from '@scure/base';
 
 let authHeader:any;
 
@@ -44,7 +45,7 @@ async function extractResponse(response:any) {
 }
 
 export async function findSbtcEventByBitcoinTxId(bitcoinTxid:string):Promise<Array<SbtcClarityEvent>> {
-  const path = addNetSelector(CONFIG.VITE_REVEALER_API + '/events/find-by/bitcoin-txid/' + bitcoinTxid);
+  const path = addNetSelector(getConfig().VITE_REVEALER_API + '/events/find-by/bitcoin-txid/' + bitcoinTxid);
   const response = await fetchCatchErrors(path);
   if (response.status !== 200) {
     console.log('Request failed to url: ' + path);
@@ -55,7 +56,7 @@ export async function findSbtcEventByBitcoinTxId(bitcoinTxid:string):Promise<Arr
 }
 
 export async function findSbtcEventByBitcoinAddress(bitcoinAddress:string):Promise<Array<SbtcClarityEvent>> {
-  const path = addNetSelector(CONFIG.VITE_REVEALER_API + '/events/find-by/bitcoin/' + bitcoinAddress);
+  const path = addNetSelector(getConfig().VITE_REVEALER_API + '/events/find-by/bitcoin/' + bitcoinAddress);
   const response = await fetchCatchErrors(path);
   if (response.status !== 200) {
     console.log('Request failed to url: ' + path);
@@ -66,7 +67,7 @@ export async function findSbtcEventByBitcoinAddress(bitcoinAddress:string):Promi
 }
 
 export async function findSbtcEventsByPage(page:number, limit:number):Promise<{ results: Array<SbtcClarityEvent>, events:number}> {
-  const path = addNetSelector(CONFIG.VITE_REVEALER_API + '/events/find-by/page/' + page + '/' + limit);
+  const path = addNetSelector(getConfig().VITE_REVEALER_API + '/events/find-by/page/' + page + '/' + limit);
   const response = await fetchCatchErrors(path);
   if (response.status !== 200) {
     console.log('Request failed to url: ' + path);
@@ -77,14 +78,14 @@ export async function findSbtcEventsByPage(page:number, limit:number):Promise<{ 
 }
 
 export async function fetchTransaction(txid:string) {
-  const path = addNetSelector(CONFIG.VITE_REVEALER_API + '/btc/tx/' + txid);
+  const path = addNetSelector(getConfig().VITE_REVEALER_API + '/btc/tx/' + txid);
   const response = await fetchCatchErrors(path);
   return await extractResponse(response);
 }
 
 export async function fetchAddressTransactions(address:string) {
   if (!address || address.length < 5) return;
-  const path = addNetSelector(CONFIG.VITE_REVEALER_API + '/btc/wallet/address/' + address + '/txs');
+  const path = addNetSelector(getConfig().VITE_REVEALER_API + '/btc/wallet/address/' + address + '/txs');
   const response = await fetchCatchErrors(path);
   if (response.status !== 200) {
     console.log('Bitcoin address not known - is the network correct?');
@@ -94,7 +95,7 @@ export async function fetchAddressTransactions(address:string) {
 
 export async function fetchUtxoSet(address:string) {
   if (!address || address.length < 5) return;
-  const path = addNetSelector(CONFIG.VITE_REVEALER_API + '/btc/wallet/address/' + address + '/utxos?verbose=true');
+  const path = addNetSelector(getConfig().VITE_REVEALER_API + '/btc/wallet/address/' + address + '/utxos?verbose=true');
   const response = await fetchCatchErrors(path);
   if (response.status !== 200) {
     console.log('Bitcoin address not known - is the network correct?');
@@ -103,7 +104,7 @@ export async function fetchUtxoSet(address:string) {
 }
 
 export async function sign(wrappedPsbt:WrappedPSBT) {
-  const path = addNetSelector(CONFIG.VITE_REVEALER_API + '/btc/tx/sign');
+  const path = addNetSelector(getConfig().VITE_REVEALER_API + '/btc/tx/sign');
   const response = await fetch(path, {
     method: 'POST',
     headers: headers(),

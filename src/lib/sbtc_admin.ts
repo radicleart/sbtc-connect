@@ -1,13 +1,11 @@
 /**
  * sbtc - interact with Stacks Blockchain to read sbtc contract info
  */
-import { CONFIG } from '$lib/config';
-import { PostConditionMode, uintCV, stringAsciiCV, bufferCVFromString, bufferCV, cvToJSON, deserializeCV, type ListCV, contractPrincipalCV } from '@stacks/transactions';
-import { tupleCV } from '@stacks/transactions/dist/esm/clarity/index.js';
-import { principalCV } from '@stacks/transactions/dist/esm/clarity/types/principalCV.js';
+import { getConfig } from '$stores/store_helpers';
+import { PostConditionMode, uintCV, stringAsciiCV, bufferCVFromString, bufferCV, cvToJSON, deserializeCV, type ListCV, contractPrincipalCV, principalCV, tupleCV } from '@stacks/transactions';
 import { openContractCall } from '@stacks/connect';
-import { getStacksNetwork } from './stacks_connect.js'
 import { hex } from '@scure/base';
+import { getStacksNetwork } from "@mijoco/stx_helpers/dist/index";
 
 export const coordinators = [
   { stxAddress: 'ST1R1061ZT6KPJXQ7PAXPFB6ZAZ6ZWW28G8HXK9G5', btcAddress: 'bc1qkj5yxgm3uf78qp2fdmgx2k76ccdvj7rx0qwhv0' }, // devnet + electrum bob
@@ -34,7 +32,7 @@ export async function romeoMintTo(contractId:string, amount:number, stxAddress: 
   }
   const functionArgs = [uintCV(amount), stxAddressCV, bufferCV(hex.decode(btcTxid)), uintCV(height), merkleProofs, uintCV(txIndex), bufferCV(hex.decode(headerHex))]
   await openContractCall({
-    network: getStacksNetwork(),
+    network: getStacksNetwork(getConfig().VITE_NETWORK),
     postConditions: [],
     postConditionMode: PostConditionMode.Deny,
     contractAddress: contractId.split('.')[0],
@@ -59,7 +57,7 @@ export async function romeoWithdrawTo(contractId:string, amount:number, stxAddre
   }
   const functionArgs = [uintCV(amount), stxAddressCV, bufferCV(hex.decode(btcTxid)), uintCV(height), merkleProofs, uintCV(txIndex), bufferCV(hex.decode(headerHex))]
   await openContractCall({
-    network: getStacksNetwork(),
+    network: getStacksNetwork(getConfig().VITE_NETWORK),
     postConditions: [],
     postConditionMode: PostConditionMode.Deny,
     contractAddress: contractId.split('.')[0],
@@ -82,7 +80,7 @@ export async function mintTo(contractId:string, amount:number, stxAddress: strin
   const stxAddressCV = principalCV(stxAddress);
   const functionArgs = [uintCV(amount), stxAddressCV, btcAddressCV]
   await openContractCall({
-    network: getStacksNetwork(),
+    network: getStacksNetwork(getConfig().VITE_NETWORK),
     postConditions: [],
     postConditionMode: PostConditionMode.Deny,
     contractAddress: contractId.split('.')[0],
@@ -100,14 +98,14 @@ export async function mintTo(contractId:string, amount:number, stxAddress: strin
 }
 
 export async function mintToMerkle(amount:number, stxAddress: string, btcTxid: string) {
-  const contractId = CONFIG.VITE_SBTC_COORDINATOR + '.asset'
+  const contractId = getConfig().VITE_SBTC_COORDINATOR + '.asset'
   
   const btcTxidCV = bufferCV(hex.decode(btcTxid))
   const stxAddressCV = principalCV(stxAddress);
   const functionArgs = [uintCV(amount), stxAddressCV, btcTxidCV]
 
   await openContractCall({
-    network: getStacksNetwork(),
+    network: getStacksNetwork(getConfig().VITE_NETWORK),
     postConditions: [],
     postConditionMode: PostConditionMode.Deny,
     contractAddress: contractId.split('.')[0],
@@ -129,7 +127,7 @@ export async function burnFrom(contractId:string, amount:number, stxAddress: str
   const stxAddressCV = principalCV(stxAddress);
   const functionArgs = [uintCV(amount), stxAddressCV, btcAddressCV]
   await openContractCall({
-    network: getStacksNetwork(),
+    network: getStacksNetwork(getConfig().VITE_NETWORK),
     postConditions: [],
     postConditionMode: PostConditionMode.Allow,
     contractAddress: contractId.split('.')[0],
@@ -147,7 +145,7 @@ export async function burnFrom(contractId:string, amount:number, stxAddress: str
 }
 
 export async function callContractReadOnly(data:any) {
-  const url = CONFIG.VITE_STACKS_API + '/v2/contracts/call-read/' + data.contractAddress + '/' + data.contractName + '/' + data.functionName;
+  const url = getConfig().VITE_STACKS_API + '/v2/contracts/call-read/' + data.contractAddress + '/' + data.contractName + '/' + data.functionName;
   let val;
   try {
       const response = await fetch(url, {
@@ -175,7 +173,7 @@ export async function setCoordinator(contractId:string, address:string) {
 
   const functionArgs = [datum]
   await openContractCall({
-    network: getStacksNetwork(),
+    network: getStacksNetwork(getConfig().VITE_NETWORK),
     postConditions: [],
     postConditionMode: PostConditionMode.Deny,
     contractAddress: contractId.split('.')[0],
@@ -196,7 +194,7 @@ export async function setsBTCPublicKey(contractId:string, publicKey:string) {
   const datum = bufferCV(hex.decode(publicKey))
   const functionArgs = [datum]
   await openContractCall({
-    network: getStacksNetwork(),
+    network: getStacksNetwork(getConfig().VITE_NETWORK),
     postConditions: [],
     postConditionMode: PostConditionMode.Deny,
     contractAddress: contractId.split('.')[0],

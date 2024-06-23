@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { payloadParseDeposit, payloadParseWithdrawal } from '$lib/revealer_api';
-	import { RevealerTxTypes } from '$types/revealer_types';
-	import type { PayloadType } from 'sbtc-bridge-lib';
+	import { RevealerTxTypes } from '@mijoco/stx_helpers/dist/index';
+	import type { PayloadType } from '@mijoco/stx_helpers/dist/index';
 	
 	let payload:PayloadType;
 	export let data:any;
 	export let bitcoinAddress:string;
 	export let type:string;
-	export let mode:string;
 	
 	onMount(async () => {
 		if (type === RevealerTxTypes.SBTC_DEPOSIT) {

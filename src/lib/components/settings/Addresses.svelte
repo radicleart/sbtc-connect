@@ -3,7 +3,7 @@
 	import { Icon, ArrowUpRight } from "svelte-hero-icons"
 	import { sbtcConfig } from '$stores/stores';
 	import { truncate, explorerAddressUrl, explorerBtcAddressUrl } from '$lib/utils'
-	import { CONFIG } from '$lib/config';
+	import { getConfig } from '$stores/store_helpers';
 
   let connected = false;
 

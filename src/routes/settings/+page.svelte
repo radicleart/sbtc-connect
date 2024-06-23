@@ -8,7 +8,7 @@
 	import Currencies from '$lib/components/settings/Currencies.svelte';
 	import Addresses from '$lib/components/settings/Addresses.svelte';
 	import Networks from '$lib/components/settings/Networks.svelte';
-	import type { ExchangeRate } from 'sbtc-bridge-lib';
+	import type { ExchangeRate } from '@mijoco/stx_helpers/dist/index';
 
 	const toggleSettings = (arg:string) => {
 		const conf:SbtcConfig = $sbtcConfig;

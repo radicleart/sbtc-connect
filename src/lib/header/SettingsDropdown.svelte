@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { sbtcConfig } from '$stores/stores';
-	import type { ExchangeRate } from 'sbtc-bridge-lib';
+	import type { ExchangeRate } from '@mijoco/stx_helpers/dist/index';
 
 	onMount(async () => {
 		if (typeof $sbtcConfig.userSettings === 'undefined') {

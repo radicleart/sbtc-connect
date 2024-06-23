@@ -3,7 +3,7 @@
   import { Icon, InformationCircle } from "svelte-hero-icons";
   import { Tooltip } from 'flowbite-svelte';
 	import { sbtcConfig } from "$stores/stores";
-	import { CONFIG } from "$lib/config";
+	import { getConfig } from '$stores/store_helpers';
 
   export let depositFlow:boolean;
   export let readonly:Boolean;
@@ -13,7 +13,7 @@
     label: 'Your Bitcoin Address',
     hint: 'Bitcoin will be sent from this account so it needs to cover the amount and tx fees.',
     resetValue: '',
-    value: $sbtcConfig.keySets[CONFIG.VITE_NETWORK].cardinal
+    value: $sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinal
   }
 
   let value:string = inputData.value;

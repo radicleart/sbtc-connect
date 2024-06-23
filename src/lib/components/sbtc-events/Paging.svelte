@@ -8,7 +8,6 @@
   const dispatch = createEventDispatcher();
 
   export let totalEvents:number;
-  export let limit:number;
   export let numPages:number;
   let inited = false;
 

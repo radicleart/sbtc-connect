@@ -1,6 +1,6 @@
 <script lang="ts">
 import { createEventDispatcher } from "svelte";
-import { CONFIG } from '$lib/config';
+import { getConfig } from '$stores/store_helpers';
 import { sbtcConfig } from '$stores/stores';
 
 const dispatch = createEventDispatcher();
@@ -9,7 +9,7 @@ export let stacksAddress:string|undefined;
 export let amount:number;
 export let sigData:any;
 export let currentTx:string;
-const webWallet = fromBtcAddress === $sbtcConfig.keySets[CONFIG.VITE_NETWORK].ordinal;
+const webWallet = fromBtcAddress === $sbtcConfig.keySets[getConfig().VITE_NETWORK].ordinal;
 let showTx = false;
 let showHex = false;
 

@@ -4,22 +4,23 @@
 	import Timeline from './shared/Timeline.svelte';
   import Banner from '$lib/components/shared/Banner.svelte';
 	import { sbtcConfig } from '$stores/stores';
-	import { CONFIG } from '$lib/config';
+	import { getConfig } from '$stores/store_helpers';
 	import type { SbtcConfig } from '$types/sbtc_config';
 	import DepositForm from './shared/DepositForm.svelte';
-	import { loggedIn, loginStacksFromHeader, verifyAmount, verifyStacksPricipal } from '$lib/stacks_connect';
 	import { goto } from '$app/navigation';
 	import StatusCheck from "./dd/StatusCheck.svelte";
 	import SignTransaction from "./dr/SignTransaction.svelte";
 	import { bitcoinBalanceFromMempool } from "$lib/utils";
 	import { MINIMUM_DEPOSIT } from "$lib/revealer_api";
+	import { isLoggedIn, loginStacksFromHeader, verifyStacksPricipal } from "@mijoco/stx_helpers/dist/index";
+	import { verifyAmount } from "$lib/stacks_connect";
 
-  const cardinal = $sbtcConfig.keySets[CONFIG.VITE_NETWORK].cardinal;
-  const bal = bitcoinBalanceFromMempool($sbtcConfig.keySets[CONFIG.VITE_NETWORK].cardinalInfo)
+  const cardinal = $sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinal;
+  const bal = bitcoinBalanceFromMempool($sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinalInfo)
   let bitcoinAddress:string; // provides utxo - most likely current wallet cardinal
   let recipient:string;      //
   let amountSats:number;
-  let paymentPublicKey = $sbtcConfig.keySets[CONFIG.VITE_NETWORK].btcPubkeySegwit1!;
+  let paymentPublicKey = $sbtcConfig.keySets[getConfig().VITE_NETWORK].btcPubkeySegwit1!;
 
   let error:string|undefined;
   let showAddresses = false;
@@ -36,7 +37,7 @@
       const conf:SbtcConfig = $sbtcConfig;
       sbtcConfig.update(() => conf);
       bitcoinAddress = ($sbtcConfig.payloadDepositData?.bitcoinAddress) ? $sbtcConfig.payloadDepositData?.bitcoinAddress : cardinal;
-      recipient = ($sbtcConfig.payloadDepositData.principal) ? $sbtcConfig.payloadDepositData?.principal : $sbtcConfig.keySets[CONFIG.VITE_NETWORK].stxAddress;
+      recipient = ($sbtcConfig.payloadDepositData.principal) ? $sbtcConfig.payloadDepositData?.principal : $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress;
       amountSats = $sbtcConfig.payloadDepositData.amountSats;
       timeLineStatus = 2;
       componentKey++;
@@ -76,8 +77,8 @@
   }
 
   onMount(async () => {
-    paymentPublicKey = $sbtcConfig.keySets[CONFIG.VITE_NETWORK].btcPubkeySegwit0!
-    if (!loggedIn()) timeLineStatus = -1
+    paymentPublicKey = $sbtcConfig.keySets[getConfig().VITE_NETWORK].btcPubkeySegwit0!
+    if (!isLoggedIn()) timeLineStatus = -1
   })
 
 </script>
@@ -105,7 +106,7 @@
     {:else if timeLineStatus === 2}
     <SignTransaction {bitcoinAddress} {recipient} {amountSats} on:update_timeline={updateTimeline}/>
     {:else if timeLineStatus === 3}
-    <StatusCheck status={2} requestType={'deposit'} mode={'op_return'} on:clicked={doClicked}/>
+    <StatusCheck status={2} requestType={'deposit'} on:clicked={doClicked}/>
     {/if}
   {/if}
   {/key}

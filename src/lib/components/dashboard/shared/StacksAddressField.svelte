@@ -3,8 +3,8 @@
   import { onMount } from 'svelte';
   import { Tooltip } from 'flowbite-svelte';
 	import { sbtcConfig } from "$stores/stores";
-	import { CONFIG } from "$lib/config";
-	import { verifyStacksPricipal } from "$lib/stacks_connect";
+	import { getConfig } from "$stores/store_helpers";
+	import { verifyStacksPricipal } from "@mijoco/stx_helpers/dist/index";
 
   export let depositFlow:boolean;
   export let readonly:Boolean;
@@ -14,7 +14,7 @@
     label: 'Stacks or Contract Address',
     hint: 'sBTC will be minted to this account or contract.',
     resetValue: '',
-    value: $sbtcConfig.keySets[CONFIG.VITE_NETWORK].stxAddress
+    value: $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress
   }
 
   let value:string = inputData.value;
@@ -43,7 +43,7 @@
         verifyStacksPricipal($sbtcConfig.payloadDepositData.principal)
         value = $sbtcConfig.payloadDepositData.principal!
       } catch (err) {
-        value = $sbtcConfig.keySets[CONFIG.VITE_NETWORK].stxAddress
+        value = $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress
       }
     } else {
       inputData.hint = 'sBTC will be withdrawn from this account'
@@ -51,7 +51,7 @@
         verifyStacksPricipal($sbtcConfig.payloadWithdrawData.principal)
         value = $sbtcConfig.payloadWithdrawData.principal!
       } catch (err) {
-        value = $sbtcConfig.keySets[CONFIG.VITE_NETWORK].stxAddress
+        value = $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress
       }
     }
   })

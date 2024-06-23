@@ -6,7 +6,7 @@
 	import Withdraw from './Withdraw.svelte';
 	import DepositDrop from './DepositDrop.svelte';
 	import { onMount } from 'svelte';
-	import { CONFIG } from '$lib/config';
+	import { getConfig } from '$stores/store_helpers';
   import Banner from '$lib/components/shared/Banner.svelte';
 
   let errorMessage:string|undefined;
@@ -27,19 +27,19 @@
       $sbtcConfig.payloadDepositData.amountSats = 10000
     }
     if (!$sbtcConfig.payloadDepositData.principal) {
-      $sbtcConfig.payloadDepositData.principal = $sbtcConfig.keySets[CONFIG.VITE_NETWORK].stxAddress
+      $sbtcConfig.payloadDepositData.principal = $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress
     }
     if (!$sbtcConfig.payloadDepositData.bitcoinAddress) {
-      $sbtcConfig.payloadDepositData.bitcoinAddress = $sbtcConfig.keySets[CONFIG.VITE_NETWORK].cardinal
+      $sbtcConfig.payloadDepositData.bitcoinAddress = $sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinal
     }
     if (!$sbtcConfig.payloadWithdrawData.amountSats) {
       $sbtcConfig.payloadWithdrawData.amountSats = 10000
     }
     if (!$sbtcConfig.payloadWithdrawData.principal) {
-      $sbtcConfig.payloadWithdrawData.principal = $sbtcConfig.keySets[CONFIG.VITE_NETWORK].stxAddress
+      $sbtcConfig.payloadWithdrawData.principal = $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress
     }
     if (!$sbtcConfig.payloadWithdrawData.bitcoinAddress) {
-      $sbtcConfig.payloadWithdrawData.bitcoinAddress = $sbtcConfig.keySets[CONFIG.VITE_NETWORK].cardinal
+      $sbtcConfig.payloadWithdrawData.bitcoinAddress = $sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinal
     }
     sbtcConfig.update(() => $sbtcConfig)
   }
@@ -61,7 +61,7 @@
     {#if !connected}
 	    <Banner
 		    bannerType={'info'}
-		    message={'sBTC wallet is not connected - go to settings and switch network. Currently on <strong>' + CONFIG.VITE_NETWORK+ '</strong>!</a>'}
+		    message={'sBTC wallet is not connected - go to settings and switch network. Currently on <strong>' + getConfig().VITE_NETWORK+ '</strong>!</a>'}
       />
     {:else}
       {#if errorMessage}

@@ -1,18 +1,17 @@
 <script lang="ts">
 import { onMount } from 'svelte';
 import { goto } from "$app/navigation";
-import { CONFIG } from '$lib/config';
-import type { BridgeTransactionType, WrappedPSBT } from 'sbtc-bridge-lib' 
+import { getConfig } from '$stores/store_helpers';
 import { signMessage } from '$lib/stacks_connect';
 import { explorerBtcTxUrl } from '$lib/utils'
 import { sbtcConfig } from '$stores/stores'
 import Button from '$lib/components/shared/Button.svelte';
 import { sign } from '$lib/events_api';
 import type { Transaction } from '@scure/btc-signer';
-import { toStorable, buildRevealOrReclaimTransaction, getPegWalletAddressFromPublicKey } from 'sbtc-bridge-lib' 
 import { Popover } from 'flowbite-svelte';
 import Invoice from '$lib/components/dashboard/shared/Invoice.svelte';
 import { fetchTransaction } from '$lib/events_api'
+	import { toStorable, type BridgeTransactionType, type WrappedPSBT } from '@mijoco/stx_helpers/dist/index';
 
 export let peginRequest:BridgeTransactionType;
 let wrappedPsbt:WrappedPSBT = {} as WrappedPSBT;
@@ -21,7 +20,7 @@ let reclaimTx:Transaction;
 let reclaiming = false;
 let errorMessage:string|undefined = undefined;
 
-const network = CONFIG.VITE_NETWORK;
+const network = getConfig().VITE_NETWORK;
 let inited = false;
 //let addressInfoReclaim: any;
 //let addressInfoReveal: any;
@@ -78,11 +77,11 @@ onMount(async () => {
 		}
 	}
 	//addressInfoReveal = await fetchUtxoSet(peginRequest.uiPayload.bitcoinAddress)
-	//addressInfoReclaim = await fetchUtxoSet(getPegWalletAddressFromPublicKey(CONFIG.VITE_NETWORK, $sbtcConfig.sbtcContractData.sbtcWalletPublicKey)!)
+	//addressInfoReclaim = await fetchUtxoSet(getPegWalletAddressFromPublicKey(getConfig().VITE_NETWORK, $sbtcConfig.sbtcContractData.sbtcWalletPublicKey)!)
 	if (peginRequest.btcTxid) commitTransaction = await fetchTransaction(peginRequest.btcTxid);
 	peginRequest.originator = commitTransaction.vout[1].scriptPubKey.address
-	reclaimTx = buildRevealOrReclaimTransaction(network, 100, true, peginRequest, commitTransaction)
-	revealTx = buildRevealOrReclaimTransaction(network, 100, true, peginRequest, commitTransaction)
+	//reclaimTx = buildRevealOrReclaimTransaction(network, 100, true, peginRequest, commitTransaction)
+	//revealTx = buildRevealOrReclaimTransaction(network, 100, true, peginRequest, commitTransaction)
 
 	//peginRequest.requestType = 'reclaim';
 	//reclaimBtcTx.fee;

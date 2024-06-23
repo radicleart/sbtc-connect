@@ -4,14 +4,13 @@
 	import Timeline from './shared/Timeline.svelte';
 	import WithdrawHeader from './shared/WithdrawHeader.svelte';
 	import { sbtcConfig } from "$stores/stores";
-	import { CONFIG } from "$lib/config";
-	import { loggedIn, loginStacksFromHeader, signMessage, verifySBTCAmount } from "$lib/stacks_connect";
 	import type { SbtcConfig } from "$types/sbtc_config";
 	import WithdrawForm from "./shared/WithdrawForm.svelte";
 	import { goto } from "$app/navigation";
-	import ScriptHashAddress from "./dd/ScriptHashAddress.svelte";
 	import SignTransaction from "./wr/SignTransaction.svelte";
-	import { getDataToSign } from "sbtc-bridge-lib";
+	import { getConfig } from "$stores/store_helpers";
+	import { getDataToSign, isLoggedIn, loginStacksFromHeader } from "@mijoco/stx_helpers/dist/index";
+	import { signMessage, verifySBTCAmount } from "$lib/stacks_connect";
 
   let amountErrored:string|undefined = undefined;
   let withdrawalRecipient:string;
@@ -31,20 +30,11 @@
     try {
       withdrawalRecipient = $sbtcConfig.payloadWithdrawData.bitcoinAddress;
       withdrawalAmountSats = $sbtcConfig.payloadWithdrawData.amountSats;
-      verifySBTCAmount(withdrawalAmountSats, $sbtcConfig.keySets[CONFIG.VITE_NETWORK].sBTCBalance, 0);
-      const niceMessage = getDataToSign(CONFIG.VITE_NETWORK, withdrawalAmountSats, $sbtcConfig.keySets[CONFIG.VITE_NETWORK].cardinal);
+      verifySBTCAmount(withdrawalAmountSats, $sbtcConfig.keySets[getConfig().VITE_NETWORK].sBTCBalance, 0);
+      const niceMessage = getDataToSign(getConfig().VITE_NETWORK, withdrawalAmountSats, $sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinal);
       console.log('getDataToSign: ' + niceMessage)
       await signMessage(async function(sigData:any, message:string) {
         withdrawalSignature = sigData.signature;
-        /**
-        console.log('message: ', message)
-        console.log('sigData: ', sigData)
-        if ($sbtcConfig.userSettings.useOpDrop) {
-          peginRequest = getBridgeWithdrawOpDrop(CONFIG.VITE_NETWORK, $sbtcConfig.sbtcContractData.sbtcWalletPublicKey, $sbtcConfig.payloadWithdrawData, $sbtcConfig.keySets[CONFIG.VITE_NETWORK].stxAddress);
-        } else {
-          peginRequest = getBridgeWithdraw(CONFIG.VITE_NETWORK, $sbtcConfig.payloadWithdrawData, $sbtcConfig.keySets[CONFIG.VITE_NETWORK].stxAddress)
-        }
-        */
         const conf:SbtcConfig = $sbtcConfig;
         conf.sigData = sigData.signature;
         sbtcConfig.update(() => conf);
@@ -56,10 +46,9 @@
     }
   }
 
-  let sBTCBalance = $sbtcConfig.keySets[CONFIG.VITE_NETWORK].sBTCBalance;
+  let sBTCBalance = $sbtcConfig.keySets[getConfig().VITE_NETWORK].sBTCBalance;
   let showAddresses = false;
   $: timeLineStatus = 1;
-  let peginRequest:BridgeTransactionType;
   let componentKey = 0;
 
   const login = async () => {
@@ -92,7 +81,7 @@
 
 
   onMount(async () => {
-    if (!loggedIn()) timeLineStatus = -1
+    if (!isLoggedIn()) timeLineStatus = -1
   })
 
 </script>

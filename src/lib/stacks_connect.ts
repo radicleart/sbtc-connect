@@ -1,21 +1,18 @@
 
-import { CONFIG } from '$lib/config';
-import { c32address, c32addressDecode } from 'c32check';
+import { getConfig } from '$stores/store_helpers';
 import { sbtcConfig } from '$stores/stores'
 import { setAuthorisation } from '$lib/events_api'
 import type { SbtcConfig, SbtcUserSettingI } from '$types/sbtc_config';
-import { StacksTestnet, StacksMainnet, StacksMocknet } from '@stacks/network';
 import { openSignatureRequestPopup, type SignatureData, type StacksProvider } from '@stacks/connect';import { AppConfig, UserSession, showConnect, getStacksProvider } from '@stacks/connect';
-import { getPegWalletAddressFromPublicKey, type AddressObject, type SbtcContractDataType, tsToDate } from 'sbtc-bridge-lib' 
 import { hashMessage, verifyMessageSignature } from '@stacks/encryption';
 import { defaultSbtcConfig } from '$types/sbtc_config';
 import { hex } from '@scure/base';
-import type { DepositPayloadUIType, ExchangeRate, WithdrawPayloadUIType } from 'sbtc-bridge-lib';
 import { AddressPurpose, BitcoinNetworkType, getAddress } from 'sats-connect'
 import type { GetAddressOptions } from 'sats-connect'
-import { getStacksAddressFromPubkey } from 'sbtc-bridge-lib/dist/payload_utils';
 import { StacksMessageType, publicKeyFromSignatureVrs } from '@stacks/transactions';
 import { fetchUiInit, fetchUserBalances } from './revealer_api';
+import { getPegWalletAddressFromPublicKey, getStacksAddressFromPubkey, getStacksNetwork, isLoggedIn, type AddressObject, type DepositPayloadUIType, type ExchangeRate, type SbtcContractDataType, type WithdrawPayloadUIType } from '@mijoco/stx_helpers/dist/index';
+import { tsToDate } from './utils';
 
 const appConfig = new AppConfig(['store_write', 'publish_data']);
 export const userSession = new UserSession({ appConfig }); // we will use this export from other files
@@ -45,40 +42,17 @@ export function isAllowed(address:string) {
 	return allowed.find((o) => o.stx === address);
 }
 
-export function getStacksNetwork() {
-	const network = CONFIG.VITE_NETWORK;
-	let stxNetwork:StacksMainnet|StacksTestnet;
-	if (network === 'devnet') stxNetwork = new StacksMocknet();
-	else if (network === 'testnet') stxNetwork = new StacksTestnet();
-	else if (network === 'mainnet') stxNetwork = new StacksMainnet();
-	else stxNetwork = new StacksMocknet();
-	return stxNetwork;
-}
-
-export function decodeStacksAddress(stxAddress:string) {
-	if (!stxAddress) throw new Error('Needs a stacks address');
-	const decoded = c32addressDecode(stxAddress)
-	return decoded
-}
-  
-export function encodeStacksAddress (network:string, b160Address:string) {
-	let version = 26
-	if (network === 'mainnet') version = 22
-	const address = c32address(version, b160Address) // 22 for mainnet
-	return address
-}
-
 export async function fetchSbtcBalance (conf:SbtcConfig, fromLogin:boolean|undefined) {
-	const localKs = conf.keySets[CONFIG.VITE_NETWORK];
+	const localKs = conf.keySets[getConfig().VITE_NETWORK];
 	//const sessionStacks = getStacksAddress(); // check not switching accounts
 	if (!fromLogin && localKs	&& localKs.stxAddress && localKs.cardinal) { // && sessionStacks === localKs.stxAddress) {
-		conf.keySets[CONFIG.VITE_NETWORK] = await getBalances(conf.sbtcContractData.contractId, localKs)
+		conf.keySets[getConfig().VITE_NETWORK] = await getBalances(conf.sbtcContractData.contractId, localKs)
 		sbtcConfig.update(() => conf);
 		return conf;
 	} else {
 		await addresses(async function(addr:AddressObject) {
 			if (addr) {
-				conf.keySets[CONFIG.VITE_NETWORK] = await getBalances(conf.sbtcContractData.contractId, addr)
+				conf.keySets[getConfig().VITE_NETWORK] = await getBalances(conf.sbtcContractData.contractId, addr)
 				sbtcConfig.update(() => conf);
 			}
 			return conf;
@@ -92,7 +66,7 @@ async function getBalances(contractId:string, addressObject:AddressObject):Promi
 	try {
 		result = await fetchUserBalances(addressObject);
 		try {
-			result.sBTCBalance = Number(result.stacksTokenInfo?.fungible_tokens[contractId + '::sbtc'].balance)
+			result.sBTCBalance = Number(result.sBTCBalance)
 		} catch (err) {
 			result.sBTCBalance = 0
 		}
@@ -106,9 +80,9 @@ async function getBalances(contractId:string, addressObject:AddressObject):Promi
 	return result;
 }
 function getStacksAddress() {
-	if (loggedIn()) {
+	if (isLoggedIn()) {
 		const userData = userSession.loadUserData();
-		const stxAddress = (CONFIG.VITE_NETWORK === 'testnet' || CONFIG.VITE_NETWORK === 'devnet') ? userData.profile.stxAddress.testnet : userData.profile.stxAddress.mainnet;
+		const stxAddress = (getConfig().VITE_NETWORK === 'testnet' || getConfig().VITE_NETWORK === 'devnet') ? userData.profile.stxAddress.testnet : userData.profile.stxAddress.mainnet;
 		return stxAddress
 	}
 	return
@@ -130,9 +104,9 @@ export function isLeather() {
 }
 
 async function addresses(callback:any):Promise<AddressObject|undefined> {
-	if (!loggedIn()) return {} as AddressObject;
+	if (!isLoggedIn()) return {} as AddressObject;
 	const userData = userSession.loadUserData();
-	const network = CONFIG.VITE_NETWORK;
+	const network = getConfig().VITE_NETWORK;
 	//let something = hashP2WPKH(payload.public_keys[0])
 	const stxAddress = getStacksAddress();
 
@@ -174,7 +148,7 @@ async function addresses(callback:any):Promise<AddressObject|undefined> {
 		}
 	} else {
 		let myType = BitcoinNetworkType.Testnet
-		if (getStacksNetwork().isMainnet()) myType = BitcoinNetworkType.Mainnet
+		if (getStacksNetwork(getConfig().VITE_NETWORK).isMainnet()) myType = BitcoinNetworkType.Mainnet
 		const getAddressOptions:GetAddressOptions = {
 			payload: {
 				purposes: [AddressPurpose.Ordinals, AddressPurpose.Payment],
@@ -247,14 +221,6 @@ export function isLegal(routeId:string):boolean {
 	}
 }
 
-export function loggedIn():boolean {
-	try {
-		return userSession.isUserSignedIn()
-	} catch (err) {
-		return false
-	}
-}
-
 export async function authenticate($sbtcConfig:SbtcConfig):Promise<SignatureData|undefined> {
 	userMessage = authMessage + ' ' + Math.floor( Math.random() * 1000000);
 	userMessage = userMessage + ' on ' + tsToDate(new Date().getTime());
@@ -270,7 +236,7 @@ export async function authenticate($sbtcConfig:SbtcConfig):Promise<SignatureData
 		//console.log('stxAddresses:', stxAddresses)
 		console.log('stxAddresses:', getStacksAddressFromPubkey(hex.decode(sigData.publicKey)))
 
-		$sbtcConfig.authHeader = { ...sigData, stxAddress: $sbtcConfig.keySets[CONFIG.VITE_NETWORK].stxAddress, amountSats: 0 }
+		$sbtcConfig.authHeader = { ...sigData, stxAddress: $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress, amountSats: 0 }
 		setAuthorisation($sbtcConfig.authHeader)
 		sbtcConfig.update(() => $sbtcConfig)
 		return sigData
@@ -278,35 +244,6 @@ export async function authenticate($sbtcConfig:SbtcConfig):Promise<SignatureData
 	return
 }
 
-export async function loginStacksJs(callback:any, conf:SbtcConfig|undefined) {
-	try {
-		const provider = getStacksProvider()
-		console.log('provider: ', provider)
-
-		if (!userSession.isUserSignedIn()) {
-			showConnect({
-				userSession,
-				appDetails: appDetails(),
-				onFinish: async () => {
-					if (conf) {
-						authenticate(conf)
-						callback(conf, true);
-					} else {
-						callback(true);
-					}
-				},
-				onCancel: () => {
-					callback(conf);
-				},
-			});
-		} else {
-			callback(conf);
-		}
-	} catch (e) {
-		if (window) window.location.href = "https://wallet.hiro.so/wallet/install-web";
-		callback(conf);
-	}
-}
 /**
 export async function loginStacks(callback:any) {
 	try {
@@ -332,16 +269,10 @@ export async function loginStacks(callback:any) {
 	}
 } */
 
-export function loginStacksFromHeader(document:any) {
-	const el = document.getElementById("connect-wallet")
-	if (el) return document.getElementById("connect-wallet").click();
-	else return false;
-}
-
 export async function signMessage(callback:any, message:string) {
 	await openSignatureRequestPopup({
 		message,
-		network: getStacksNetwork(), // for mainnet, `new StacksMainnet()`
+		network: getStacksNetwork(getConfig().VITE_NETWORK), // for mainnet, `new StacksMainnet()`
 		appDetails: appDetails(),
 		onFinish({ publicKey, signature }) {
 			let newSig = signature.substring(0, signature.length - 2);
@@ -356,7 +287,7 @@ export async function signMessage(callback:any, message:string) {
 export async function signMessageForWithdraw(callback:any, message:string) {
 	await openSignatureRequestPopup({
 		message,
-		network: getStacksNetwork(), // for mainnet, `new StacksMainnet()`
+		network: getStacksNetwork(getConfig().VITE_NETWORK), // for mainnet, `new StacksMainnet()`
 		appDetails: appDetails(),
 		onFinish({ publicKey, signature }) {
 			//let newSig = signature.substring(0, signature.length - 2);
@@ -367,32 +298,6 @@ export async function signMessageForWithdraw(callback:any, message:string) {
 			callback({ publicKey, signature }, message);
 		}
 	});
-}
-
-export function logUserOut() {
-	return userSession.signUserOut();
-}
-
-const FORMAT = /[ `!@#$%^&*()_+=[\]{};':"\\|,<>/?~]/;
-
-export function verifyStacksPricipal(stacksAddress?:string) {
-	if (!stacksAddress) {
-	  throw new Error('Address not found');
-	} else if (FORMAT.test(stacksAddress)) {
-	  throw new Error('please remove white space / special characters');
-	}
-	try {
-	  const decoded = decodeStacksAddress(stacksAddress.split('.')[0]);
-	  if ((CONFIG.VITE_NETWORK === 'testnet' || CONFIG.VITE_NETWORK === 'devnet') && decoded[0] !== 26) {
-		throw new Error('Please enter a valid stacks blockchain testnet address');
-	  }
-	  if (CONFIG.VITE_NETWORK === 'mainnet' && decoded[0] !== 22) {
-		throw new Error('Please enter a valid stacks blockchain mainnet address');
-	  }
-	  return stacksAddress;
-	  } catch (err:any) {
-		  throw new Error('Invalid stacks principal - please enter a valid ' + CONFIG.VITE_NETWORK + ' account or contract principal.');
-	  }
 }
 
 export function verifyAmount(amount:number, balance:number) {
@@ -420,7 +325,7 @@ export async function initApplication(conf:SbtcConfig, fromLogin:boolean|undefin
 	let data = {} as any;
 	try {
 		data = await fetchUiInit();
-		if (data.sbtcContractData.sbtcWalletPublicKey) data.sbtcContractData.sbtcWalletAddress = getPegWalletAddressFromPublicKey(CONFIG.VITE_NETWORK, data.sbtcContractData.sbtcWalletPublicKey);
+		if (data.sbtcContractData.sbtcWalletPublicKey) data.sbtcContractData.sbtcWalletAddress = getPegWalletAddressFromPublicKey(getConfig().VITE_NETWORK, data.sbtcContractData.sbtcWalletPublicKey);
 		conf.loggedIn = false;
 		if (userSession.isUserSignedIn()) {
 			await fetchSbtcBalance(conf, fromLogin);
@@ -432,7 +337,7 @@ export async function initApplication(conf:SbtcConfig, fromLogin:boolean|undefin
 		} as any; 
 	}
 	if (!conf.keySets) {
-		if (CONFIG.VITE_NETWORK === 'testnet'|| CONFIG.VITE_NETWORK === 'devnet') {
+		if (getConfig().VITE_NETWORK === 'testnet'|| getConfig().VITE_NETWORK === 'devnet') {
 			conf.keySets = { 'testnet': {} as AddressObject };
 		} else {
 			conf.keySets = { 'mainnet': {} as AddressObject };
@@ -464,7 +369,7 @@ export async function initApplication(conf:SbtcConfig, fromLogin:boolean|undefin
 	if (!conf.userSettings) conf.userSettings = {} as SbtcUserSettingI
 	if (!conf.payloadDepositData) conf.payloadDepositData = {} as WithdrawPayloadUIType
 	if (!conf.payloadWithdrawData) conf.payloadWithdrawData = {} as WithdrawPayloadUIType
-	if (loggedIn()) {
+	if (isLoggedIn()) {
 		try {
 			doPayloadData(conf) 
 			//walletAddresses = await (window as any).btc?.request('getAddresses');
@@ -475,15 +380,15 @@ export async function initApplication(conf:SbtcConfig, fromLogin:boolean|undefin
 	}
 	conf.payloadDepositData.sbtcWalletPublicKey = conf.sbtcContractData.sbtcWalletPublicKey
 	conf.payloadWithdrawData.sbtcWalletPublicKey = conf.sbtcContractData.sbtcWalletPublicKey
-	if (!conf.keySets || !conf.keySets[CONFIG.VITE_NETWORK]) {
-		conf.keySets[CONFIG.VITE_NETWORK] = {} as AddressObject;
+	if (!conf.keySets || !conf.keySets[getConfig().VITE_NETWORK]) {
+		conf.keySets[getConfig().VITE_NETWORK] = {} as AddressObject;
 	}
 	sbtcConfig.update(() => conf);
 }
 
 function doPayloadData(conf:SbtcConfig) {
-	if (!conf.keySets[CONFIG.VITE_NETWORK].btcPubkeySegwit0) throw new Error('Public Key missing from logged in user')
-	let prn = conf.keySets[CONFIG.VITE_NETWORK].stxAddress
+	if (!conf.keySets[getConfig().VITE_NETWORK].btcPubkeySegwit0) throw new Error('Public Key missing from logged in user')
+	let prn = conf.keySets[getConfig().VITE_NETWORK].stxAddress
 	let amountSats = 0
 	if (conf.payloadDepositData && conf.payloadDepositData.amountSats > 0) {
 		amountSats = conf.payloadDepositData.amountSats
@@ -493,15 +398,15 @@ function doPayloadData(conf:SbtcConfig) {
 	}
 	const payloadDepositData:DepositPayloadUIType = {
 			sbtcWalletPublicKey: conf.sbtcContractData.sbtcWalletPublicKey,
-			reclaimPublicKey: conf.keySets[CONFIG.VITE_NETWORK].btcPubkeySegwit1 || '',
-			bitcoinAddress: conf.keySets[CONFIG.VITE_NETWORK].cardinal,
-			paymentPublicKey: conf.keySets[CONFIG.VITE_NETWORK].btcPubkeySegwit0 || '',
+			reclaimPublicKey: conf.keySets[getConfig().VITE_NETWORK].btcPubkeySegwit1 || '',
+			bitcoinAddress: conf.keySets[getConfig().VITE_NETWORK].cardinal,
+			paymentPublicKey: conf.keySets[getConfig().VITE_NETWORK].btcPubkeySegwit0 || '',
 			principal: prn,
 			amountSats
 	}
 	conf.payloadDepositData = payloadDepositData;
 
-	prn = conf.keySets[CONFIG.VITE_NETWORK].stxAddress
+	prn = conf.keySets[getConfig().VITE_NETWORK].stxAddress
 	amountSats = 0
 	if (conf.payloadWithdrawData && conf.payloadWithdrawData.principal) {
 		prn = conf.payloadWithdrawData.principal
@@ -511,9 +416,9 @@ function doPayloadData(conf:SbtcConfig) {
 	}
 	const payloadWithdrawData:WithdrawPayloadUIType = {
 			sbtcWalletPublicKey: conf.sbtcContractData.sbtcWalletPublicKey,
-			reclaimPublicKey: conf.keySets[CONFIG.VITE_NETWORK].btcPubkeySegwit1 || '',
-			bitcoinAddress: conf.keySets[CONFIG.VITE_NETWORK].cardinal,
-			paymentPublicKey: conf.keySets[CONFIG.VITE_NETWORK].btcPubkeySegwit0 || '',
+			reclaimPublicKey: conf.keySets[getConfig().VITE_NETWORK].btcPubkeySegwit1 || '',
+			bitcoinAddress: conf.keySets[getConfig().VITE_NETWORK].cardinal,
+			paymentPublicKey: conf.keySets[getConfig().VITE_NETWORK].btcPubkeySegwit0 || '',
 			principal: prn,
 			amountSats
 	}

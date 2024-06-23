@@ -1,8 +1,6 @@
 <script lang="ts">
 import { onMount } from 'svelte';
-//import { parsePayloadFromTransaction } from 'sbtc-bridge-lib';
-import { CONFIG } from '$lib/config';
-	import { parsePayloadFromTransaction } from 'sbtc-bridge-lib';
+import { getConfig } from '$stores/store_helpers';
 	import { mintToMerkle } from '$lib/sbtc_admin';
   import Button from "../shared/Button.svelte";
 
@@ -18,7 +16,7 @@ const getType = (opCode:string) => {
 }
 
 onMount(async () => {
-  res = parsePayloadFromTransaction(CONFIG.VITE_NETWORK, tx.hex)
+  res = parsePayloadFromTransaction(getConfig().VITE_NETWORK, tx.hex)
   inited = true;
 })
 

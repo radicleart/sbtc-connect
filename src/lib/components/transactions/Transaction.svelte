@@ -1,19 +1,17 @@
 <script lang="ts">
 	import { explorerBtcTxUrl, explorerTxUrl, getNet, getStatusAsWord } from '$lib/utils';
-	import { satsToBitcoin, getPegWalletAddressFromPublicKey, getAddressFromOutScript } from 'sbtc-bridge-lib';
 	import { onMount } from 'svelte';
 	import * as btc from '@scure/btc-signer';
 	import { hex } from '@scure/base';
-	import { CONFIG } from '$lib/config';
-	import { payloadParseDeposit } from '$lib/revealer_api';
-	import { RevealerTxTypes, type RevealerTransaction, CommitmentStatus, RevealerTxModes } from '$types/revealer_types';
+	import { getConfig } from '$stores/store_helpers';
+	import { RevealerTxTypes, type RevealerTransaction, CommitmentStatus, RevealerTxModes, isLoggedIn } from '@mijoco/stx_helpers/dist/index';
 	import Payload from './Payload.svelte';
-	import { loggedIn } from '$lib/stacks_connect';
 	import { sbtcConfig } from '$stores/stores';
 	import { isCoordinator } from '$lib/sbtc_admin';
 	import TransactionAnalysis from '../admin/TransactionAnalysis.svelte';
+	import { getAddressFromOutScript, getPegWalletAddressFromPublicKey } from '@mijoco/stx_helpers/dist/index';
 	
-	const coordinator = (loggedIn() && $sbtcConfig.keySets[CONFIG.VITE_NETWORK]) ? isCoordinator($sbtcConfig.keySets[CONFIG.VITE_NETWORK].stxAddress) : undefined;
+	const coordinator = (isLoggedIn() && $sbtcConfig.keySets[getConfig().VITE_NETWORK]) ? isCoordinator($sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress) : undefined;
 
 	export let transaction:RevealerTransaction;
 	let sbtcWalletPubKey:string;
@@ -32,7 +30,7 @@
 			if (transaction.mode === RevealerTxModes.OP_DROP && transaction.commitment) {
 				const walletPubKey = btc.Script.decode(hex.decode(transaction.commitment.leaves[0].script));
 				sbtcWalletPubKey = hex.encode(walletPubKey[2] as Uint8Array)
-				sbtcWalletAddress = getPegWalletAddressFromPublicKey(CONFIG.VITE_NETWORK, sbtcWalletPubKey) || ''
+				sbtcWalletAddress = getPegWalletAddressFromPublicKey(getConfig().VITE_NETWORK, sbtcWalletPubKey) || ''
 				data = hex.encode(walletPubKey[0] as Uint8Array)
 			} else {
 				// op return deposit
@@ -47,7 +45,7 @@
 			}
 			const bitcoinAddressOut = btcTx.getOutput(1)
 			//const bitcoinAddressOutScript = btc.OutScript.decode(bitcoinAddressOut.script!);
-			bitcoinAddress = getAddressFromOutScript(CONFIG.VITE_NETWORK, bitcoinAddressOut.script!)
+			bitcoinAddress = getAddressFromOutScript(getConfig().VITE_NETWORK, bitcoinAddressOut.script!)
 
 			const sbtcOutput = btcTx.getOutput(2)
 			const outputScript = btc.OutScript.decode(sbtcOutput.script!);
@@ -94,8 +92,8 @@
 	  	<div class="flex">
 			<div class="w-1/5">Stacks Tx:</div>
 			<div class="w-4/5">
-			{#if transaction.eventData?.stacksAddress}
-			<a class="" href={explorerTxUrl(transaction.eventData?.stacksAddress)} target="_blank" rel="noreferrer">{(transaction.eventData?.stacksAddress)}</a>
+			{#if transaction.originator}
+			<a class="" href={explorerTxUrl(transaction.originator)} target="_blank" rel="noreferrer">{(transaction.originator)}</a>
 			{:else}
 			Not yet minted
 			{/if}
@@ -109,19 +107,19 @@
 			<div class="w-4/5 "><a class="" href={explorerBtcTxUrl(transaction.txId)} target="_blank" rel="noreferrer">{(transaction.txId)}</a></div>
 			{/if}
 		</div>
-		{#if transaction.revealTxId}
+		{#if transaction.txId}
 		<div class="flex">
 			<div class="w-1/5">Revealed in Tx:</div>
-			<div class="w-4/5 "><a class="" href={explorerBtcTxUrl(transaction.revealTxId)} target="_blank" rel="noreferrer">{(transaction.txId)}</a></div>
+			<div class="w-4/5 "><a class="" href={explorerBtcTxUrl(transaction.txId)} target="_blank" rel="noreferrer">{(transaction.txId)}</a></div>
 		</div>
 		{/if}
-		{#if transaction.reclaimTxId}
+		{#if transaction.txId}
 		<div class="flex">
 			<div class="w-1/5">Reclaimed in Tx:</div>
-			<div class="w-4/5 "><a class="" href={explorerBtcTxUrl(transaction.reclaimTxId)} target="_blank" rel="noreferrer">{(transaction.txId)}</a></div>
+			<div class="w-4/5 "><a class="" href={explorerBtcTxUrl(transaction.txId)} target="_blank" rel="noreferrer">{(transaction.txId)}</a></div>
 		</div>
 		{/if}
-		<Payload {data} type={transaction.type} mode={transaction.mode} {bitcoinAddress} />
+		<Payload {data} type={transaction.type} {bitcoinAddress} />
 	</div>
 	{/if}
 	{#if coordinator && transaction.status > 0 && transaction.mode === RevealerTxModes.OP_RETURN}

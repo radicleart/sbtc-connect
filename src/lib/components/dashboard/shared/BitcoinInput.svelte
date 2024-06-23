@@ -5,11 +5,10 @@
   import { sbtcConfig } from '$stores/stores'
   import { bitcoinBalanceFromMempool, bitcoinToSats, satsToBitcoin } from '$lib/utils'
 	import type { SbtcConfig } from '$types/sbtc_config';
-  import type { ExchangeRate } from 'sbtc-bridge-lib';
   import { fmtNumber } from '$lib/utils'
-	import { verifyAmount } from '$lib/stacks_connect';
-	import { CONFIG } from '$lib/config';
+	import { getConfig } from '$stores/store_helpers';
   import { createEventDispatcher } from "svelte";
+	import type { ExchangeRate } from '@mijoco/stx_helpers/dist/index';
 
   const dispatch = createEventDispatcher();
 
@@ -37,9 +36,9 @@
       const denomination = $sbtcConfig.userSettings.currency.denomination;
       let baly = 0
       if (depositFlow) {
-        baly = bitcoinBalanceFromMempool($sbtcConfig.keySets[CONFIG.VITE_NETWORK].cardinalInfo)
+        baly = bitcoinBalanceFromMempool($sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinalInfo)
       } else {
-        baly = $sbtcConfig.keySets[CONFIG.VITE_NETWORK].sBTCBalance || 0
+        baly = $sbtcConfig.keySets[getConfig().VITE_NETWORK].sBTCBalance || 0
       }
 
       if (denomination === 'bitcoin') {
@@ -100,11 +99,11 @@
 
   $: getBalance = () => {
     if ($sbtcConfig.userSettings.peggingIn) {
-      if ($sbtcConfig.userSettings.currency.denomination === 'bitcoin') return satsToBitcoin(bitcoinBalanceFromMempool($sbtcConfig.keySets[CONFIG.VITE_NETWORK].cardinalInfo))
-      else return bitcoinBalanceFromMempool($sbtcConfig.keySets[CONFIG.VITE_NETWORK].cardinalInfo)
+      if ($sbtcConfig.userSettings.currency.denomination === 'bitcoin') return satsToBitcoin(bitcoinBalanceFromMempool($sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinalInfo))
+      else return bitcoinBalanceFromMempool($sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinalInfo)
     } else {
-      if ($sbtcConfig.userSettings.currency.denomination === 'bitcoin') return satsToBitcoin($sbtcConfig.keySets[CONFIG.VITE_NETWORK].sBTCBalance)
-      else return $sbtcConfig.keySets[CONFIG.VITE_NETWORK].sBTCBalance
+      if ($sbtcConfig.userSettings.currency.denomination === 'bitcoin') return satsToBitcoin($sbtcConfig.keySets[getConfig().VITE_NETWORK].sBTCBalance)
+      else return $sbtcConfig.keySets[getConfig().VITE_NETWORK].sBTCBalance
     }
   }
 
