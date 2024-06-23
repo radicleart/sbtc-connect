@@ -3,7 +3,7 @@ import { onMount } from 'svelte';
 import { tsToDate } from '$lib/utils'
 import * as btc from '@scure/btc-signer';
 import TxExport from './TxExport.svelte';
-import { sbtcConfig } from '$stores/stores'
+import { sessionStore } from '$stores/stores'
 	import { parseDepositPayload, type BridgeTransactionType } from '@mijoco/stx_helpers/dist/index';
 
 export let peginRequest:BridgeTransactionType;
@@ -54,22 +54,22 @@ onMount(() => {
   {#if showCommitDetails}
   <div class="mt-4 col-12">Reclaim Data</div>
   <div class="col-md-2 col-sm-12 text-info">Refunds to</div><div class="col-md-10 col-sm-12">{peginRequest.originator}</div>
-  {#if stacksData && $sbtcConfig.userSettings.debugMode}
+  {#if stacksData && $sessionStore.userSettings.debugMode}
   <div class="col-md-2 col-sm-12 text-info">Reclaim Pub Key</div><div class="col-md-10 col-sm-12">{peginRequest.uiPayload.paymentPublicKey}</div>
   {/if}
   {#if peginRequest.status < 3}
   <TxExport btcTx={reclaimBtcTx} txtype={'reclaim'} amount={peginRequest.vout?.value || 0}/>
   {/if}
   <div class="mt-4 col-12">Reveal Data</div>
-  <div class="col-md-2 col-sm-12 text-info">Sbtc Address</div><div class="col-md-10 col-sm-12">{$sbtcConfig.sbtcContractData.sbtcWalletAddress}</div>
-  {#if stacksData && $sbtcConfig.userSettings.debugMode}
-  <div class="col-md-2 col-sm-12 text-info">Reveal Pub Key</div><div class="col-md-10 col-sm-12">{$sbtcConfig.sbtcContractData.sbtcWalletPublicKey}</div>
+  <div class="col-md-2 col-sm-12 text-info">Sbtc Address</div><div class="col-md-10 col-sm-12">{$sessionStore.sbtcInfo.sbtcContractData.sbtcWalletAddress}</div>
+  {#if stacksData && $sessionStore.userSettings.debugMode}
+  <div class="col-md-2 col-sm-12 text-info">Reveal Pub Key</div><div class="col-md-10 col-sm-12">{$sessionStore.sbtcInfo.sbtcContractData.sbtcWalletPublicKey}</div>
   {/if}
   <div class="mt-4 col-12 text-info"></div>
   {#if peginRequest.status < 3}
   <TxExport btcTx={revealBtcTx} txtype={'reveal'} amount={peginRequest.vout?.value || 0}/>
   {/if}
-    {#if stacksData && $sbtcConfig.userSettings.debugMode}
+    {#if stacksData && $sessionStore.userSettings.debugMode}
     <div class="mt-4 col-12">Stacks Data</div>
     <div class="col-md-2 col-sm-12 text-info">Op Code</div><div class="col-md-10 col-sm-12">{stacksData.opcode}</div>
     <div class="col-md-2 col-sm-12 text-info">Address</div><div class="col-md-10 col-sm-12">{stacksData.stacksAddress}</div>

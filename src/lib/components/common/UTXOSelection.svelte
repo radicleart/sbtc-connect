@@ -4,7 +4,7 @@ import { isSupported } from "$lib/utils";
 import { onMount } from 'svelte';
 import { getConfig } from '$stores/store_helpers';
 import { truncate, explorerBtcTxUrl, explorerTxUrl } from '$lib/utils'
-import { sbtcConfig } from '$stores/stores';
+import { sessionStore } from '$stores/stores';
 
 const dispatch = createEventDispatcher();
 
@@ -21,15 +21,15 @@ export let utxoData:{label:string,info:string,utxos:Array<any>,maxCommit:number,
 let bitcoinAddress:string|undefined = utxoData.fromBtcAddress;
 let errorReason:string|undefined;
 let showUtxos:boolean;
-let showDebugInfo = $sbtcConfig.userSettings.debugMode;
+let showDebugInfo = $sessionStore.userSettings.debugMode;
 
 const useWebWallet = async () => {
-  bitcoinAddress = $sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinal;
+  bitcoinAddress = $sessionStore.keySets[getConfig().VITE_NETWORK].cardinal;
   configureUTXOs(true);
 }
 
 const isWebWallet = async () => {
-  return (bitcoinAddress === $sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinal);
+  return (bitcoinAddress === $sessionStore.keySets[getConfig().VITE_NETWORK].cardinal);
 }
 
 const configureUTXOs = async (force:boolean) => {
@@ -38,11 +38,11 @@ const configureUTXOs = async (force:boolean) => {
   try {
     isSupported(bitcoinAddress);
   } catch (err:any) {
-    //bitcoinAddress = $sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinal;
+    //bitcoinAddress = $sessionStore.keySets[getConfig().VITE_NETWORK].cardinal;
     errorReason = 'Unsupported bitcoin address - the reclaim feature currently requires a taproot (segwit v1) bitcoin addresses.';
     return;
   }
-  //if (utxoData.fromBtcAddress === bitcoinAddress && $sbtcConfig.utxos) {
+  //if (utxoData.fromBtcAddress === bitcoinAddress && $sessionStore.utxos) {
     //return;
   //}
   try {
@@ -70,7 +70,7 @@ onMount(async () => {
     <div class="d-flex justify-content-between">
       <div class="text-small">{utxoData.info}</div>
     </div>
-    {#if $sbtcConfig.userSettings.useOpDrop || utxoData.numbInputs > 0}
+    {#if $sessionStore.userSettings.useOpDrop || utxoData.numbInputs > 0}
     <div class="text-small d-flex justify-content-between  text-info">
       <div class="" title={utxoData.numbInputs + ' unspent inputs with total value: ' + utxoData.maxCommit}>BTC Balance {utxoData.maxCommit} Sats.</div>
       {#if showDebugInfo}

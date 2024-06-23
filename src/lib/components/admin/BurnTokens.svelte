@@ -1,11 +1,11 @@
 <script lang="ts">
 import { burnFrom } from "$lib/sbtc_admin.js";
-import { sbtcConfig } from '$stores/stores'
+import { sessionStore } from '$stores/stores'
 import Button from "../shared/Button.svelte";
 import { getConfig } from '$stores/store_helpers';
 
 let pegOutAmount:number|undefined;
-let stxAddress:string|undefined = $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress;
+let stxAddress:string|undefined = $sessionStore.keySets[getConfig().VITE_NETWORK].stxAddress;
 let btcTxid:string|undefined;
 let error:string|undefined;
 const burn = async () => {
@@ -14,7 +14,7 @@ const burn = async () => {
     return;
   }
   error = undefined;
-  const res = await burnFrom($sbtcConfig.sbtcContractData.contractId, pegOutAmount||0, stxAddress, btcTxid);
+  const res = await burnFrom($sessionStore.sbtcInfo.sbtcContractData.contractId, pegOutAmount||0, stxAddress, btcTxid);
 }
 </script>
 

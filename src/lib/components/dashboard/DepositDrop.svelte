@@ -2,9 +2,9 @@
   import { onMount } from "svelte";
 	import DepositHeader from './shared/DepositHeader.svelte';
 	import Timeline from './shared/Timeline.svelte';
-	import { sbtcConfig } from '$stores/stores';
+	import { sessionStore } from '$stores/stores';
 	import { getConfig } from '$stores/store_helpers';
-	import type { SbtcConfig } from '$types/sbtc_config';
+	import type { SessionStore } from '$types/local_types';
 	import DepositForm from './shared/DepositForm.svelte';
 	import { isWalletAccountConnected, verifyAmount } from '$lib/stacks_connect';
 	import { goto } from '$app/navigation';
@@ -21,12 +21,12 @@
   let componentKey = 0;
   let amountErrored:string|undefined = undefined;
   let commitment:{commitAddress: string};
-  let amountSats = $sbtcConfig.payloadDepositData.amountSats;
+  let amountSats = $sessionStore.sbtcInfo.payloadDepositData.amountSats;
   let walletBalance = 0;
-  let recipient = $sbtcConfig.payloadDepositData.principal;
+  let recipient = $sessionStore.sbtcInfo.payloadDepositData.principal;
   let status:number = 1;
   let myTransactions:Array<RevealerTransaction>;
-  let stxAddress = $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress
+  let stxAddress = $sessionStore.keySets[getConfig().VITE_NETWORK].stxAddress
 
   const checkPayment = async () => {
     const result = await checkRevealerTransactionPayment(commitment.commitAddress)
@@ -55,17 +55,17 @@
 
   const invoice = async () => {
     try {
-      verifyAmount($sbtcConfig.payloadDepositData.amountSats, walletBalance);
-      verifyStacksPricipal($sbtcConfig.payloadDepositData.principal)
+      verifyAmount($sessionStore.sbtcInfo.payloadDepositData.amountSats, walletBalance);
+      verifyStacksPricipal($sessionStore.sbtcInfo.payloadDepositData.principal)
 
-      const conf:SbtcConfig = $sbtcConfig;
-      sbtcConfig.update(() => conf);
+      const conf:SessionStore = $sessionStore;
+      sessionStore.update(() => conf);
       commitment = await getAddressForOpDropDeposit(
-        $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress,
+        $sessionStore.keySets[getConfig().VITE_NETWORK].stxAddress,
         recipient,
         amountSats,
-        $sbtcConfig.keySets[getConfig().VITE_NETWORK].btcPubkeySegwit1!,
-        $sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinal,
+        $sessionStore.keySets[getConfig().VITE_NETWORK].btcPubkeySegwit1!,
+        $sessionStore.keySets[getConfig().VITE_NETWORK].cardinal,
       );
       timeLineStatus = 2;
       componentKey++;
@@ -103,7 +103,7 @@
 
   onMount(async () => {
     if (isLoggedIn()) {
-      walletBalance = bitcoinBalanceFromMempool($sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinalInfo)
+      walletBalance = bitcoinBalanceFromMempool($sessionStore.keySets[getConfig().VITE_NETWORK].cardinalInfo)
       myTransactions = await fetchRevealerTransactionsPendingByOriginator(stxAddress) //(mypage, limit)
     } else {
       timeLineStatus = -1

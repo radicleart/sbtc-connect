@@ -3,8 +3,8 @@
   import Banner from '$lib/components/shared/Banner.svelte';
 	import Timeline from './shared/Timeline.svelte';
 	import WithdrawHeader from './shared/WithdrawHeader.svelte';
-	import { sbtcConfig } from "$stores/stores";
-	import type { SbtcConfig } from "$types/sbtc_config";
+	import { sessionStore } from "$stores/stores";
+	import type { SessionStore } from "$types/local_types";
 	import WithdrawForm from "./shared/WithdrawForm.svelte";
 	import { goto } from "$app/navigation";
 	import SignTransaction from "./wr/SignTransaction.svelte";
@@ -28,16 +28,16 @@
 
   const invoice = async () => {
     try {
-      withdrawalRecipient = $sbtcConfig.payloadWithdrawData.bitcoinAddress;
-      withdrawalAmountSats = $sbtcConfig.payloadWithdrawData.amountSats;
-      verifySBTCAmount(withdrawalAmountSats, $sbtcConfig.keySets[getConfig().VITE_NETWORK].sBTCBalance, 0);
-      const niceMessage = getDataToSign(getConfig().VITE_NETWORK, withdrawalAmountSats, $sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinal);
+      withdrawalRecipient = $sessionStore.sbtcInfo.payloadWithdrawData.bitcoinAddress;
+      withdrawalAmountSats = $sessionStore.sbtcInfo.payloadWithdrawData.amountSats;
+      verifySBTCAmount(withdrawalAmountSats, $sessionStore.keySets[getConfig().VITE_NETWORK].sBTCBalance, 0);
+      const niceMessage = getDataToSign(getConfig().VITE_NETWORK, withdrawalAmountSats, $sessionStore.keySets[getConfig().VITE_NETWORK].cardinal);
       console.log('getDataToSign: ' + niceMessage)
       await signMessage(async function(sigData:any, message:string) {
         withdrawalSignature = sigData.signature;
-        const conf:SbtcConfig = $sbtcConfig;
-        conf.sigData = sigData.signature;
-        sbtcConfig.update(() => conf);
+        const conf:SessionStore = $sessionStore;
+        conf.sbtcInfo.sigData = sigData.signature;
+        sessionStore.update(() => conf);
         timeLineStatus = 2;
       }, niceMessage);
     } catch(err:any) {
@@ -46,7 +46,7 @@
     }
   }
 
-  let sBTCBalance = $sbtcConfig.keySets[getConfig().VITE_NETWORK].sBTCBalance;
+  let sBTCBalance = $sessionStore.keySets[getConfig().VITE_NETWORK].sBTCBalance;
   let showAddresses = false;
   $: timeLineStatus = 1;
   let componentKey = 0;

@@ -4,7 +4,7 @@ import { createEventDispatcher } from "svelte";
 import { hex, base64 } from '@scure/base';
 import * as btc from '@scure/btc-signer';
 import { openPsbtRequestPopup } from '@stacks/connect'
-import { sbtcConfig } from '$stores/stores';
+import { sessionStore } from '$stores/stores';
 import { explorerBtcTxUrl } from "$lib/utils";
 import { appDetails, isLeather } from "$lib/stacks_connect";
 import Invoice from '../shared/Invoice.svelte';
@@ -20,9 +20,9 @@ import { broadcastDeposit, getPsbtForWithdrawal } from '$lib/revealer_api';
 export let withdrawalRecipient:string;
 export let withdrawalAmountSats:number;
 export let withdrawalSignature:string;
-let paymentAddress = $sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinal;
-let paymentPublicKey = $sbtcConfig.keySets[getConfig().VITE_NETWORK].btcPubkeySegwit0!;
-let originator = $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress;
+let paymentAddress = $sessionStore.keySets[getConfig().VITE_NETWORK].cardinal;
+let paymentPublicKey = $sessionStore.keySets[getConfig().VITE_NETWORK].btcPubkeySegwit0!;
+let originator = $sessionStore.keySets[getConfig().VITE_NETWORK].stxAddress;
 
 const dispatch = createEventDispatcher();
 let psbtHolder:PSBTHolder;
@@ -43,7 +43,7 @@ const getExplorerUrl = () => {
 }
 
 export function isWalletAddress() {
-  return withdrawalRecipient === $sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinal
+  return withdrawalRecipient === $sessionStore.keySets[getConfig().VITE_NETWORK].cardinal
 }
 
 export async function requestSignPsbt() {
@@ -58,7 +58,7 @@ export async function requestSignPsbt() {
 
 const getBbMessage = () => {
   let msg = '<p>View transaction on the <a class="text-black underline" href=' + getExplorerUrl() + ' target="_blank" rel="noreferrer">Bitcoin network</a>.</p>'
-  msg += '<p>Once confirmed your sBTC will be withdrawn from your Stacks Account and your Bitcoin returned - <a href="/transactions/' + $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress + '">keep track here</a>. </p>'
+  msg += '<p>Once confirmed your sBTC will be withdrawn from your Stacks Account and your Bitcoin returned - <a href="/transactions/' + $sessionStore.keySets[getConfig().VITE_NETWORK].stxAddress + '">keep track here</a>. </p>'
   return msg
 }
 

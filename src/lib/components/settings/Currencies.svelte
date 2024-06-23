@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { sbtcConfig } from '$stores/stores';
-	import type { SbtcConfig } from '$types/sbtc_config';
+	import { sessionStore } from '$stores/stores';
+	import type { SessionStore } from '$types/local_types';
   import { compareCurrencies } from '$lib/utils'
 	import { CheckCircle, ChevronDown, Icon } from "svelte-hero-icons"
   import { Button, Dropdown, DropdownItem } from 'flowbite-svelte';
@@ -21,47 +21,47 @@
 	}
 
   const setCurrency = (currency:string) => {
-    if (!$sbtcConfig.exchangeRates) return;
-    const rateNow = $sbtcConfig.exchangeRates.find((o:any) => o.currency === currency)
+    if (!$sessionStore.exchangeRates) return;
+    const rateNow = $sessionStore.exchangeRates.find((o:any) => o.currency === currency)
     if (!rateNow) return;
-		const conf:SbtcConfig = $sbtcConfig;
+		const conf:SessionStore = $sessionStore;
     conf.userSettings.currency.myFiatCurrency = myCurrency = rateNow
-		sbtcConfig.update(() => conf);
+		sessionStore.update(() => conf);
 	}
 
   const setDefaultCurrency = (defC:ExchangeRate) => {
-		const conf:SbtcConfig = $sbtcConfig;
+		const conf:SessionStore = $sessionStore;
     conf.userSettings.currency.myFiatCurrency = defC
-		sbtcConfig.update(() => conf);
+		sessionStore.update(() => conf);
 	}
 
   $: getDenomination = () => {
-		return $sbtcConfig.userSettings.currency.denomination;
+		return $sessionStore.userSettings.currency.denomination;
 	}
 
   const setDenomination = (denomination:string) => {
-		const conf:SbtcConfig = $sbtcConfig;
+		const conf:SessionStore = $sessionStore;
     conf.userSettings.currency.denomination = denomination;
-		sbtcConfig.update(() => conf);
+		sessionStore.update(() => conf);
   }
 
   const getCurrency = (currency:string) => {
-    return $sbtcConfig.exchangeRates?.find((o:any) => o.currency === currency) || $sbtcConfig.userSettings.currency.myFiatCurrency
+    return $sessionStore.exchangeRates?.find((o:any) => o.currency === currency) || $sessionStore.userSettings.currency.myFiatCurrency
   }
 
   onMount(async () => {
-    if ($sbtcConfig.exchangeRates) {
-      const exchangeRates = $sbtcConfig.exchangeRates!;
+    if ($sessionStore.exchangeRates) {
+      const exchangeRates = $sessionStore.exchangeRates!;
       currencies = []
       for (var rate of exchangeRates) {
         currencies.push({ value: rate.currency, name: rate.name})
       }
       currencies.sort(compareCurrencies);
-      const currency = $sbtcConfig.userSettings.currency.myFiatCurrency.currency;
+      const currency = $sessionStore.userSettings.currency.myFiatCurrency.currency;
       const rateNow = exchangeRates.find((o:any) => o.currency === currency)
       if (rateNow) setDefaultCurrency(rateNow)
       else setDefaultCurrency(exchangeRates.find((o:any) => o.currency === 'USD') || {} as ExchangeRate)
-      myCurrency = $sbtcConfig.userSettings.currency.myFiatCurrency
+      myCurrency = $sessionStore.userSettings.currency.myFiatCurrency
       inited = true;
     } else {
       error = 'Exchange rates are not available'

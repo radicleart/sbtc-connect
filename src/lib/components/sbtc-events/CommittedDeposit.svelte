@@ -4,7 +4,7 @@ import { goto } from "$app/navigation";
 import { getConfig } from '$stores/store_helpers';
 import { signMessage } from '$lib/stacks_connect';
 import { explorerBtcTxUrl } from '$lib/utils'
-import { sbtcConfig } from '$stores/stores'
+import { sessionStore } from '$stores/stores'
 import Button from '$lib/components/shared/Button.svelte';
 import { sign } from '$lib/events_api';
 import type { Transaction } from '@scure/btc-signer';
@@ -77,7 +77,7 @@ onMount(async () => {
 		}
 	}
 	//addressInfoReveal = await fetchUtxoSet(peginRequest.uiPayload.bitcoinAddress)
-	//addressInfoReclaim = await fetchUtxoSet(getPegWalletAddressFromPublicKey(getConfig().VITE_NETWORK, $sbtcConfig.sbtcContractData.sbtcWalletPublicKey)!)
+	//addressInfoReclaim = await fetchUtxoSet(getPegWalletAddressFromPublicKey(getConfig().VITE_NETWORK, $sessionStore.sbtcInfo.sbtcContractData.sbtcWalletPublicKey)!)
 	if (peginRequest.btcTxid) commitTransaction = await fetchTransaction(peginRequest.btcTxid);
 	peginRequest.originator = commitTransaction.vout[1].scriptPubKey.address
 	//reclaimTx = buildRevealOrReclaimTransaction(network, 100, true, peginRequest, commitTransaction)
@@ -100,7 +100,7 @@ onMount(async () => {
     <h1 class="text-3xl font-medium">Details</h1>
   </div>
   <div class="flex gap-x-2 justify-end">
-    {#if $sbtcConfig.userSettings.debugMode}
+    {#if $sessionStore.userSettings.debugMode}
     <div id="po-sign-reveal"><Button darkScheme={false} label={'Reveal'} target={'signReveal'} on:clicked={() => signReveal()}/></div>
     {/if}
   </div>

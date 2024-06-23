@@ -2,9 +2,9 @@
   import { onMount } from 'svelte';
   import { Icon, InformationCircle, ArrowsRightLeft } from "svelte-hero-icons";
   import { Tooltip } from 'flowbite-svelte';
-  import { sbtcConfig } from '$stores/stores'
+  import { sessionStore } from '$stores/stores'
   import { bitcoinBalanceFromMempool, bitcoinToSats, satsToBitcoin } from '$lib/utils'
-	import type { SbtcConfig } from '$types/sbtc_config';
+	import type { SessionStore } from '$types/local_types';
   import { fmtNumber } from '$lib/utils'
 	import { getConfig } from '$stores/store_helpers';
   import { createEventDispatcher } from "svelte";
@@ -33,12 +33,12 @@
       reason = undefined
       let vstr = value.toString()
       if (vstr.endsWith('.')) return
-      const denomination = $sbtcConfig.userSettings.currency.denomination;
+      const denomination = $sessionStore.userSettings.currency.denomination;
       let baly = 0
       if (depositFlow) {
-        baly = bitcoinBalanceFromMempool($sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinalInfo)
+        baly = bitcoinBalanceFromMempool($sessionStore.keySets[getConfig().VITE_NETWORK].cardinalInfo)
       } else {
-        baly = $sbtcConfig.keySets[getConfig().VITE_NETWORK].sBTCBalance || 0
+        baly = $sessionStore.keySets[getConfig().VITE_NETWORK].sBTCBalance || 0
       }
 
       if (denomination === 'bitcoin') {
@@ -62,8 +62,8 @@
         }
         inputData.valueSat = bitcoinToSats(value)
         inputData.valueBtc = value;
-        if (depositFlow) $sbtcConfig.payloadDepositData.amountSats = bitcoinToSats(value)
-        else $sbtcConfig.payloadWithdrawData.amountSats = bitcoinToSats(value)
+        if (depositFlow) $sessionStore.sbtcInfo.payloadDepositData.amountSats = bitcoinToSats(value)
+        else $sessionStore.sbtcInfo.payloadWithdrawData.amountSats = bitcoinToSats(value)
       } else {
         if (value === 0) return
         if (value > baly) {
@@ -77,10 +77,10 @@
 
         inputData.valueBtc = satsToBitcoin(value)
         inputData.valueSat = value;
-        if (depositFlow) $sbtcConfig.payloadDepositData.amountSats = value
-        else $sbtcConfig.payloadWithdrawData.amountSats = value
+        if (depositFlow) $sessionStore.sbtcInfo.payloadDepositData.amountSats = value
+        else $sessionStore.sbtcInfo.payloadWithdrawData.amountSats = value
       }
-      sbtcConfig.set($sbtcConfig)
+      sessionStore.set($sessionStore)
       dispatch('amount_event', { success: true, reason: undefined });
     } catch(err:any) {
       reason = 'Amount exceeds your balance';
@@ -91,26 +91,26 @@
 
   const setDenomination = (denomination:string) => {
     reason = undefined
-		const conf:SbtcConfig = $sbtcConfig;
+		const conf:SessionStore = $sessionStore;
     conf.userSettings.currency.denomination = denomination;
-		sbtcConfig.update(() => conf);
+		sessionStore.update(() => conf);
     setDisplayValue()
   }
 
   $: getBalance = () => {
-    if ($sbtcConfig.userSettings.peggingIn) {
-      if ($sbtcConfig.userSettings.currency.denomination === 'bitcoin') return satsToBitcoin(bitcoinBalanceFromMempool($sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinalInfo))
-      else return bitcoinBalanceFromMempool($sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinalInfo)
+    if ($sessionStore.userSettings.peggingIn) {
+      if ($sessionStore.userSettings.currency.denomination === 'bitcoin') return satsToBitcoin(bitcoinBalanceFromMempool($sessionStore.keySets[getConfig().VITE_NETWORK].cardinalInfo))
+      else return bitcoinBalanceFromMempool($sessionStore.keySets[getConfig().VITE_NETWORK].cardinalInfo)
     } else {
-      if ($sbtcConfig.userSettings.currency.denomination === 'bitcoin') return satsToBitcoin($sbtcConfig.keySets[getConfig().VITE_NETWORK].sBTCBalance)
-      else return $sbtcConfig.keySets[getConfig().VITE_NETWORK].sBTCBalance
+      if ($sessionStore.userSettings.currency.denomination === 'bitcoin') return satsToBitcoin($sessionStore.keySets[getConfig().VITE_NETWORK].sBTCBalance)
+      else return $sessionStore.keySets[getConfig().VITE_NETWORK].sBTCBalance
     }
   }
 
   const setDisplayValue = () => {
-    denomination = $sbtcConfig.userSettings.currency.denomination;
-    inputData.valueBtc = satsToBitcoin($sbtcConfig.payloadDepositData.amountSats)
-    inputData.valueSat = $sbtcConfig.payloadDepositData.amountSats
+    denomination = $sessionStore.userSettings.currency.denomination;
+    inputData.valueBtc = satsToBitcoin($sessionStore.sbtcInfo.payloadDepositData.amountSats)
+    inputData.valueSat = $sessionStore.sbtcInfo.payloadDepositData.amountSats
     if (denomination === 'bitcoin') {
       inputData.label = 'Amount (bitcoin)'
       value = inputData.valueBtc;
@@ -122,16 +122,16 @@
 
   onMount(async () => {
     setDisplayValue()
-    currency = $sbtcConfig.userSettings.currency.myFiatCurrency;
+    currency = $sessionStore.userSettings.currency.myFiatCurrency;
     if (depositFlow) {
-      if ($sbtcConfig.payloadDepositData.amountSats > 0) {
-        if (denomination === 'bitcoin') value = satsToBitcoin($sbtcConfig.payloadDepositData.amountSats)
-        else value = $sbtcConfig.payloadDepositData.amountSats
+      if ($sessionStore.sbtcInfo.payloadDepositData.amountSats > 0) {
+        if (denomination === 'bitcoin') value = satsToBitcoin($sessionStore.sbtcInfo.payloadDepositData.amountSats)
+        else value = $sessionStore.sbtcInfo.payloadDepositData.amountSats
       }
     } else {
-      if ($sbtcConfig.payloadWithdrawData.amountSats > 0) {
-        if (denomination === 'bitcoin') value = satsToBitcoin($sbtcConfig.payloadWithdrawData.amountSats)
-        else value = $sbtcConfig.payloadWithdrawData.amountSats
+      if ($sessionStore.sbtcInfo.payloadWithdrawData.amountSats > 0) {
+        if (denomination === 'bitcoin') value = satsToBitcoin($sessionStore.sbtcInfo.payloadWithdrawData.amountSats)
+        else value = $sessionStore.sbtcInfo.payloadWithdrawData.amountSats
       }
     }
   })

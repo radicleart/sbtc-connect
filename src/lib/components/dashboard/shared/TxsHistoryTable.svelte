@@ -9,7 +9,7 @@
   import { satsToBitcoin } from '$lib/utils'
   import ArrowUpRight from '$lib/components/shared/ArrowUpRight.svelte';
   import Paging from '$lib/components/sbtc-events/Paging.svelte';
-  import { sbtcConfig } from '$stores/stores';
+  import { sessionStore } from '$stores/stores';
   import { getConfig } from '$stores/store_helpers';
 	import type { SbtcClarityEvent } from '@mijoco/stx_helpers/dist/index';
 
@@ -45,7 +45,7 @@
   }
 
   const fetchMine = async () => {
-    const mySbtcEvents = await findSbtcEventByBitcoinAddress($sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinal)
+    const mySbtcEvents = await findSbtcEventByBitcoinAddress($sessionStore.keySets[getConfig().VITE_NETWORK].cardinal)
     sbtcEvents.results = mySbtcEvents
     sbtcEvents.events = mySbtcEvents.length
   }

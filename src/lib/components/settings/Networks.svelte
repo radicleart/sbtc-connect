@@ -3,8 +3,8 @@
 	import { Icon, InformationCircle } from "svelte-hero-icons"
 	import { Button } from 'flowbite-svelte'
 	import { setConfig } from '$lib/config';
-	import { sbtcConfig } from '$stores/stores';
-	import type { SbtcConfig } from '$types/sbtc_config';
+	import { sessionStore } from '$stores/stores';
+	import type { SessionStore } from '$types/local_types';
 	import { fetchSbtcBalance } from '$lib/stacks_connect'
 	import Banner from '$lib/components/shared/Banner.svelte';
 	import { getConfig } from '$stores/store_helpers';
@@ -15,8 +15,8 @@
 
 	const switchDevnet = async () => {
 		switchConfig('devnet');
-		await fetchSbtcBalance($sbtcConfig, true);
-		sbtcConfig.update((conf:SbtcConfig) => {
+		await fetchSbtcBalance($sessionStore, true);
+		sessionStore.update((conf:SessionStore) => {
 			return conf;
 		});
 		const url = new URL(location.href);
@@ -30,8 +30,8 @@
 
 	const switchDevenv = async () => {
 		switchConfig('devnet');
-		await fetchSbtcBalance($sbtcConfig, true);
-		sbtcConfig.update((conf:SbtcConfig) => {
+		await fetchSbtcBalance($sessionStore, true);
+		sessionStore.update((conf:SessionStore) => {
 			return conf;
 		});
 		const url = new URL(location.href);
@@ -44,8 +44,8 @@
 		if (net === 'mainnet') net = 'testnet';
 		else net = 'mainnet'
 		setConfig(net);
-		await fetchSbtcBalance($sbtcConfig, true);
-		sbtcConfig.update((conf:SbtcConfig) => {
+		await fetchSbtcBalance($sessionStore, true);
+		sessionStore.update((conf:SessionStore) => {
 			return conf;
 		});
 		const url = new URL(location.href);

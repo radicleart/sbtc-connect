@@ -1,14 +1,22 @@
-import type { AddressObject, InFlight, ExchangeRate, PoxInfo, ProposalEvent, SbtcUserSettingI, SoloPoolData, StacksBalance, StacksInfo, ExtensionType } from "@mijoco/stx_helpers/dist/index/dist/index";
+import type { DepositPayloadUIType, SbtcContractDataType, WithdrawPayloadUIType } from "@mijoco/stx_helpers/dist/index";
+import type { AddressObject, InFlight, ExchangeRate, PoxInfo, ProposalEvent, SbtcUserSettingI, SoloPoolData, StacksBalance, StacksInfo, ExtensionType } from "@mijoco/stx_helpers/dist/index";
 
 export type SessionStore = {
   name: string;
-  loggedIn: boolean,
   balances?: StacksBalance,
   keySets: { [key: string]: AddressObject; };
   userSettings:SbtcUserSettingI;
   poxInfo:PoxInfo,
   exchangeRates: Array<ExchangeRate>
   stacksInfo: StacksInfo;
+  sbtcInfo: SbtcInformation;
+};
+
+export type SbtcInformation = {
+  sigData:any;
+  sbtcContractData: SbtcContractDataType;
+  payloadDepositData: DepositPayloadUIType;
+  payloadWithdrawData: WithdrawPayloadUIType;
 };
 
 

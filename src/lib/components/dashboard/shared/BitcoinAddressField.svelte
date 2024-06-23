@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { Icon, InformationCircle } from "svelte-hero-icons";
   import { Tooltip } from 'flowbite-svelte';
-	import { sbtcConfig } from "$stores/stores";
+	import { sessionStore } from "$stores/stores";
 	import { getConfig } from '$stores/store_helpers';
 
   export let depositFlow:boolean;
@@ -13,7 +13,7 @@
     label: 'Your Bitcoin Address',
     hint: 'Bitcoin will be sent from this account so it needs to cover the amount and tx fees.',
     resetValue: '',
-    value: $sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinal
+    value: $sessionStore.keySets[getConfig().VITE_NETWORK].cardinal
   }
 
   let value:string = inputData.value;
@@ -28,18 +28,18 @@
     try {
       reason = undefined;
       inputData.value = value;
-      if (depositFlow) $sbtcConfig.payloadDepositData.bitcoinAddress = value
-      else $sbtcConfig.payloadWithdrawData.bitcoinAddress = value
+      if (depositFlow) $sessionStore.sbtcInfo.payloadDepositData.bitcoinAddress = value
+      else $sessionStore.sbtcInfo.payloadWithdrawData.bitcoinAddress = value
     } catch(err:any) {
       reason = err.message || 'Error - is the address a valid';
     }
   }
   onMount(async () => {
     if (depositFlow) {
-      if ($sbtcConfig.payloadDepositData.bitcoinAddress) value = $sbtcConfig.payloadDepositData.bitcoinAddress
+      if ($sessionStore.sbtcInfo.payloadDepositData.bitcoinAddress) value = $sessionStore.sbtcInfo.payloadDepositData.bitcoinAddress
     } else {
       inputData.hint = 'Your bitcoin will be sent to this address';
-      if ($sbtcConfig.payloadWithdrawData.bitcoinAddress) value = $sbtcConfig.payloadWithdrawData.bitcoinAddress
+      if ($sessionStore.sbtcInfo.payloadWithdrawData.bitcoinAddress) value = $sessionStore.sbtcInfo.payloadWithdrawData.bitcoinAddress
     }
   })
 </script>

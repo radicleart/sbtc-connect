@@ -6,12 +6,12 @@
 	import { getConfig } from '$stores/store_helpers';
 	import { RevealerTxTypes, type RevealerTransaction, CommitmentStatus, RevealerTxModes, isLoggedIn } from '@mijoco/stx_helpers/dist/index';
 	import Payload from './Payload.svelte';
-	import { sbtcConfig } from '$stores/stores';
+	import { sessionStore } from '$stores/stores';
 	import { isCoordinator } from '$lib/sbtc_admin';
 	import TransactionAnalysis from '../admin/TransactionAnalysis.svelte';
 	import { getAddressFromOutScript, getPegWalletAddressFromPublicKey } from '@mijoco/stx_helpers/dist/index';
 	
-	const coordinator = (isLoggedIn() && $sbtcConfig.keySets[getConfig().VITE_NETWORK]) ? isCoordinator($sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress) : undefined;
+	const coordinator = (isLoggedIn() && $sessionStore.keySets[getConfig().VITE_NETWORK]) ? isCoordinator($sessionStore.keySets[getConfig().VITE_NETWORK].stxAddress) : undefined;
 
 	export let transaction:RevealerTransaction;
 	let sbtcWalletPubKey:string;

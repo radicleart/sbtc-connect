@@ -1,6 +1,6 @@
 <script lang="ts">
 import { mintTo } from "$lib/sbtc_admin.js";
-import { sbtcConfig } from '$stores/stores'
+import { sessionStore } from '$stores/stores'
 	import Button from "../shared/Button.svelte";
 
 let pegInAmount:number|undefined;
@@ -13,7 +13,7 @@ const mint = async () => {
     return;
   }
   error = undefined;
-  const res = await mintTo($sbtcConfig.sbtcContractData.contractId, pegInAmount||0, stxAddress, btcTxid);
+  const res = await mintTo($sessionStore.sbtcInfo.sbtcContractData.contractId, pegInAmount||0, stxAddress, btcTxid);
 }
 </script>
 

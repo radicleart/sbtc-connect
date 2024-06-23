@@ -1,9 +1,9 @@
 <script lang="ts">
-import { sbtcConfig } from '$stores/stores';
+import { sessionStore } from '$stores/stores';
 
 </script>
 
-<span>sBTC Wallet: { $sbtcConfig.sbtcContractData.sbtcWalletAddress } </span>
+<span>sBTC Wallet: { $sessionStore.sbtcInfo.sbtcContractData.sbtcWalletAddress } </span>
 	
 <style>
 </style>

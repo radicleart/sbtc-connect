@@ -2,19 +2,17 @@
 	import { Navbar, NavBrand, NavLi, NavUl, NavHamburger } from 'flowbite-svelte'
 	import { createEventDispatcher, onMount } from "svelte";
 	import Brand from './Brand.svelte'
-	import { sbtcConfig } from '$stores/stores';
+	import { sessionStore } from '$stores/stores';
 	import { afterNavigate, goto } from "$app/navigation";
-	import { authenticate, initApplication } from '$lib/stacks_connect'
 	import { isCoordinator } from '$lib/sbtc_admin.js'
 	import AccountDropdown from './AccountDropdown.svelte'
 	import SettingsDropdown from './SettingsDropdown.svelte';
 	import { getConfig } from '$stores/store_helpers';
-	import { setAuthorisation } from '$lib/events_api';
 	import { disconnect } from '@stacks/connect';
 	import { isLoggedIn, logUserOut, loginStacksFromHeader, type AddressObject, type DepositPayloadUIType, type WithdrawPayloadUIType } from '@mijoco/stx_helpers/dist/index';
 
 	const dispatch = createEventDispatcher();
-	const coordinator = (isLoggedIn() && $sbtcConfig.keySets[getConfig().VITE_NETWORK]) ? isCoordinator($sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress) : undefined;
+	const coordinator = (isLoggedIn() && $sessionStore.keySets[getConfig().VITE_NETWORK]) ? isCoordinator($sessionStore.keySets[getConfig().VITE_NETWORK].stxAddress) : undefined;
 
 	const doLogin = async () => {
 		if (isLoggedIn()) doLogout()
@@ -27,25 +25,12 @@
 		componentKey++;
 	})
 
-	const loginCallback = async () => {
-		await initApplication($sbtcConfig, true)
-		if (isLoggedIn() && !$sbtcConfig.authHeader) {
-			await authenticate($sbtcConfig)
-		}
-		await setAuthorisation($sbtcConfig.authHeader)
-		setTimeout(function() {
-			dispatch('login_event');
-			componentKey++;
-		}, 500)
-	}
-
 	const doLogout = async () => {
 		logUserOut();
-		$sbtcConfig.authHeader = undefined
-		$sbtcConfig.payloadDepositData = {} as DepositPayloadUIType
-		$sbtcConfig.payloadWithdrawData = {} as WithdrawPayloadUIType
-		$sbtcConfig.keySets[getConfig().VITE_NETWORK] = {} as AddressObject;
-		await sbtcConfig.update(() => $sbtcConfig)
+		$sessionStore.sbtcInfo.payloadDepositData = {} as DepositPayloadUIType
+		$sessionStore.sbtcInfo.payloadWithdrawData = {} as WithdrawPayloadUIType
+		$sessionStore.keySets[getConfig().VITE_NETWORK] = {} as AddressObject;
+		await sessionStore.update(() => $sessionStore)
 		dispatch('login_event');
 		disconnect()
 		setTimeout(function() {
@@ -110,7 +95,7 @@
 		{#if coordinator}
 			<NavLi nonActiveClass={getNavActiveClass('/admin')} href="/admin">Admin</NavLi>
 		{/if}
-		{#if $sbtcConfig.userSettings.debugMode}
+		{#if $sessionStore.userSettings.debugMode}
 			<NavLi nonActiveClass={getNavActiveClass('/proofs')} href="/proofs">Tx Check</NavLi>
 		{/if}
 

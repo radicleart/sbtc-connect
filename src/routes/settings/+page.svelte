@@ -3,24 +3,24 @@
 	import { Button, Toggle } from 'flowbite-svelte'
 	import { InformationCircle, Icon } from "svelte-hero-icons"
   import { Tooltip } from 'flowbite-svelte';
-	import { sbtcConfig } from '$stores/stores';
-	import type { SbtcConfig } from '$types/sbtc_config';
+	import { sessionStore } from '$stores/stores';
+	import type { SessionStore } from '$types/local_types';
 	import Currencies from '$lib/components/settings/Currencies.svelte';
 	import Addresses from '$lib/components/settings/Addresses.svelte';
 	import Networks from '$lib/components/settings/Networks.svelte';
 	import type { ExchangeRate } from '@mijoco/stx_helpers/dist/index';
 
 	const toggleSettings = (arg:string) => {
-		const conf:SbtcConfig = $sbtcConfig;
+		const conf:SessionStore = $sessionStore;
 		if (arg === 'txmode') conf.userSettings.useOpDrop = !conf.userSettings.useOpDrop;
 		if (arg === 'debug') conf.userSettings.debugMode = !conf.userSettings.debugMode;
 		if (arg === 'cryptoFirst') conf.userSettings.currency.cryptoFirst = !conf.userSettings.currency.cryptoFirst;
-		sbtcConfig.update(() => conf);
+		sessionStore.update(() => conf);
 	}
 
 	onMount(async () => {
-		if (typeof $sbtcConfig.userSettings === 'undefined') {
-			$sbtcConfig.userSettings = {
+		if (typeof $sessionStore.userSettings === 'undefined') {
+			$sessionStore.userSettings = {
 				useOpDrop: false,
 				debugMode: false,
         peggingIn: true,
@@ -31,14 +31,14 @@
 				}
 			}
 		}
-		if (typeof $sbtcConfig.userSettings.currency === 'undefined') {
-			$sbtcConfig.userSettings.currency = {
+		if (typeof $sessionStore.userSettings.currency === 'undefined') {
+			$sessionStore.userSettings.currency = {
 				cryptoFirst: false,
 				myFiatCurrency: { currency: 'USD'} as ExchangeRate,
 				denomination: 'bitcoin'
 			}
 		}
-		sbtcConfig.update(() => $sbtcConfig);
+		sessionStore.update(() => $sessionStore);
 	})
 </script>
 
@@ -81,7 +81,7 @@
             </p>
             <div class="w-1/4 text-white font-normal flex items-center gap-2">
               <span class="inline-flex bg-black rounded-xl text-white px-4 py-1 font-normal">
-                {#if $sbtcConfig.userSettings?.useOpDrop}OP_DROP{:else}OP_RETURN{/if}
+                {#if $sessionStore.userSettings?.useOpDrop}OP_DROP{:else}OP_RETURN{/if}
               </span>
               <div id="po-opdrop">
                 <Icon src="{InformationCircle}" class="text-white w-6 h-6" mini aria-hidden="true" />
@@ -93,7 +93,7 @@
           </div>
           <div class="mt-4">
             <Button on:click={() => toggleSettings('txmode')} class="block w-full md:w-auto md:inline-flex items-center gap-x-1.5 bg-primary-01 px-4 py-2 font-normal text-black rounded-xl border border-primary-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500/50 shrink-0">
-            Switch to {#if $sbtcConfig.userSettings?.useOpDrop}OP_RETURN{:else}OP_DROP{/if}
+            Switch to {#if $sessionStore.userSettings?.useOpDrop}OP_RETURN{:else}OP_DROP{/if}
             </Button>
           </div>
         </div>
@@ -101,10 +101,10 @@
         <div class="py-6">
           <h2 class="text-2xl font-medium mb-2">Advanced mode</h2>
           <div class="bg-gray-1000 flex gap-2 align-top">
-            <Toggle class=" text-white" checked={$sbtcConfig.userSettings?.debugMode} on:click={() => toggleSettings('debug')} ></Toggle>
+            <Toggle class=" text-white" checked={$sessionStore.userSettings?.debugMode} on:click={() => toggleSettings('debug')} ></Toggle>
             <p class="text-white">
-              <span class="text-white font-medium">Advanced mode {#if $sbtcConfig.userSettings?.debugMode}On{:else}Off{/if}</span>
-              <span class="block text-sm">{#if $sbtcConfig.userSettings?.debugMode}Show advanced info{:else}Hide advanced info{/if}</span>
+              <span class="text-white font-medium">Advanced mode {#if $sessionStore.userSettings?.debugMode}On{:else}Off{/if}</span>
+              <span class="block text-sm">{#if $sessionStore.userSettings?.debugMode}Show advanced info{:else}Hide advanced info{/if}</span>
           </div>
         </div>
       </div>

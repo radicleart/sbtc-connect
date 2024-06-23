@@ -2,7 +2,7 @@
   import Button from "../shared/Button.svelte";
   import VerifyTransactions from './VerifyTransactions.svelte';
 	import DecodeSbtc from "./DecodeSbtc.svelte";
-	import { sbtcConfig } from "$stores/stores";
+	import { sessionStore } from "$stores/stores";
 	import { onMount } from "svelte";
 	import { fetchBitcoinBlock, fetchBitcoinTransaction } from "$lib/revealer_api";
 
@@ -19,8 +19,8 @@
   
   const verify = async () => {
     tx = await fetchBitcoinTransaction(txId)
-    $sbtcConfig.userSettings.testAddress = txId
-    sbtcConfig.update(() => $sbtcConfig)
+    $sessionStore.userSettings.testAddress = txId
+    sessionStore.update(() => $sessionStore)
     try {
       blockHash = (tx.status) ? tx.status.block_hash : tx.blockhash
       if (blockHash) {

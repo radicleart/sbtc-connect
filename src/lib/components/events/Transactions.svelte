@@ -3,7 +3,7 @@
   import { Skeleton, Tabs, TabItem } from 'flowbite-svelte';
   import { page } from '$app/stores';
   import { COMMS_ERROR } from '$lib/utils.js'
-  import { sbtcConfig } from '$stores/stores';
+  import { sessionStore } from '$stores/stores';
   import { getConfig } from '$stores/store_helpers';
 	import Event from '$lib/components/events/Event.svelte';
 	import Paging from '$lib/components/events/Paging.svelte';
@@ -19,7 +19,7 @@
   let showAll:boolean = true;
   const limit = 20;
   let numPages = 0;
-  let stxAddress = $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress
+  let stxAddress = $sessionStore.keySets[getConfig().VITE_NETWORK].stxAddress
   let total = 0;
 
   const fetchPage = async (evt:any) => {
@@ -33,7 +33,7 @@
     if (mode === 'all') {
       transactions = await fetchRevealerTransactions(mypage, limit) //(mypage, limit)
     } else {
-      transactions = await fetchRevealerTransactionsByOriginator($sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress, 0, 100) //(mypage, limit)
+      transactions = await fetchRevealerTransactionsByOriginator($sessionStore.keySets[getConfig().VITE_NETWORK].stxAddress, 0, 100) //(mypage, limit)
     }
 
     const resid = ((total % limit) > 0) ? 1 : 0;

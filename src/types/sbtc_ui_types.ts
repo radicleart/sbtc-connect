@@ -15,7 +15,6 @@ export interface BalanceI {
 export interface UIObject {
 	keys:KeySet;
 	sbtcContractData:SbtcContractDataType;
-	btcFeeRates:FeeEstimateResponse;
 	rates:Array<ExchangeRate>
 }
   

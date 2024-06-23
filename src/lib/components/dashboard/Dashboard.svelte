@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { sbtcConfig } from '$stores/stores';
+  import { sessionStore } from '$stores/stores';
 	import { getConfig } from '$stores/store_helpers';
 	import { fmtNumber, fmtSatoshiToBitcoin, satsToBitcoin } from '$lib/utils';
 	import { isLoggedIn, loginStacksFromHeader } from "@mijoco/stx_helpers/dist/index";
@@ -8,15 +8,15 @@
   let showFiat = true
 
   $: currentBalance = () => {
-    return fmtSatoshiToBitcoin($sbtcConfig.keySets[getConfig().VITE_NETWORK].sBTCBalance || 0.00000000)
+    return fmtSatoshiToBitcoin($sessionStore.keySets[getConfig().VITE_NETWORK].sBTCBalance || 0.00000000)
   }
   const tvl = (showFiat:boolean) => {
     if (showFiat) {
-      const currency = $sbtcConfig.userSettings.currency.myFiatCurrency;
-      const tvlSBTC = satsToBitcoin($sbtcConfig.sbtcContractData.totalSupply || 0)
+      const currency = $sessionStore.userSettings.currency.myFiatCurrency;
+      const tvlSBTC = satsToBitcoin($sessionStore.sbtcInfo.sbtcContractData.totalSupply || 0)
       return currency.symbol + fmtNumber(currency.fifteen * tvlSBTC || 0) + ' ' + currency.currency
     } else {
-      const tvlSBTC = satsToBitcoin($sbtcConfig.sbtcContractData.totalSupply || 0)
+      const tvlSBTC = satsToBitcoin($sessionStore.sbtcInfo.sbtcContractData.totalSupply || 0)
       return fmtNumber(tvlSBTC) + ' sBTC'
     }
   }

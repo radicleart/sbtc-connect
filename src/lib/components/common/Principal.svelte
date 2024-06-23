@@ -1,7 +1,7 @@
 <script lang="ts">
 import { getConfig } from '$stores/store_helpers';
 import { createEventDispatcher } from "svelte";
-import { sbtcConfig } from '$stores/stores';
+import { sessionStore } from '$stores/stores';
 
 export let principalData:{ label:string, info:string, currentAddress:string|undefined };
 
@@ -34,8 +34,8 @@ const changeStxAddress = async () => {
     <input type="text" id="from-address" class="form-control form-inline" autocomplete="off" bind:value={stxAddress} on:input={() => changeStxAddress()} />
     <div class="d-flex justify-content-between text-small text-info">
       <div class="text-small text-white">{principalData.info}</div>
-      {#if stxAddress !== $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress}
-      <div><a href="/" class="" on:click|preventDefault={() => { stxAddress = $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress; changeStxAddress() }}>mine</a></div>
+      {#if stxAddress !== $sessionStore.keySets[getConfig().VITE_NETWORK].stxAddress}
+      <div><a href="/" class="" on:click|preventDefault={() => { stxAddress = $sessionStore.keySets[getConfig().VITE_NETWORK].stxAddress; changeStxAddress() }}>mine</a></div>
       {/if}
     </div>
     {#if errored && stxAddress && stxAddress.length > 0}<div class="text-warning">{reason}</div>{/if}

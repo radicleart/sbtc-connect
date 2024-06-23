@@ -3,7 +3,7 @@ import { createEventDispatcher } from "svelte";
 import { isSupported } from "$lib/utils";
 import { onMount } from 'svelte';
 import { getConfig } from '$stores/store_helpers';
-import { sbtcConfig } from '$stores/stores';
+import { sessionStore } from '$stores/stores';
 import { truncate, explorerBtcTxUrl } from '$lib/utils'
 
 const dispatch = createEventDispatcher();
@@ -23,7 +23,7 @@ let errorReason:string|undefined;
 let showUtxos:boolean;
 
 const hiroWallet = async () => {
-  bitcoinAddress = $sbtcConfig.keySets[getConfig().VITE_NETWORK].ordinal;
+  bitcoinAddress = $sessionStore.keySets[getConfig().VITE_NETWORK].ordinal;
   configureUTXOs(true);
 }
 
@@ -37,7 +37,7 @@ const configureUTXOs = async (force:boolean) => {
     errorReason = 'Insufficient balance - please use a different bitcoin address';
     return;
   }
-  //if (utxoData.fromBtcAddress === bitcoinAddress && $sbtcConfig.utxos) {
+  //if (utxoData.fromBtcAddress === bitcoinAddress && $sessionStore.utxos) {
     //return;
   //}
   try {

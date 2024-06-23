@@ -3,7 +3,7 @@ import { onMount } from 'svelte';
 import { createEventDispatcher } from "svelte";
 import { hex } from '@scure/base';
 import { openPsbtRequestPopup } from '@stacks/connect'
-import { sbtcConfig } from '$stores/stores';
+import { sessionStore } from '$stores/stores';
 import { explorerBtcTxUrl } from "$lib/utils";
 import { appDetails, isLeather } from "$lib/stacks_connect";
 import Invoice from '../shared/Invoice.svelte';
@@ -20,9 +20,9 @@ import { Icon, InformationCircle } from 'svelte-hero-icons';
 export let bitcoinAddress:string;
 export let recipient:string;
 export let amountSats:number;
-let paymentAddress = $sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinal;
-let paymentPublicKey = $sbtcConfig.keySets[getConfig().VITE_NETWORK].btcPubkeySegwit0!;
-let originator = $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress;
+let paymentAddress = $sessionStore.keySets[getConfig().VITE_NETWORK].cardinal;
+let paymentPublicKey = $sessionStore.keySets[getConfig().VITE_NETWORK].btcPubkeySegwit0!;
+let originator = $sessionStore.keySets[getConfig().VITE_NETWORK].stxAddress;
 
 const dispatch = createEventDispatcher();
 let psbtHolder:PSBTHolder|undefined;
@@ -35,7 +35,7 @@ const getExplorerUrl = () => {
   return explorerBtcTxUrl(broadcastedTxId)
 }
 export function isWalletAddress() {
-  return bitcoinAddress === $sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinal
+  return bitcoinAddress === $sessionStore.keySets[getConfig().VITE_NETWORK].cardinal
 }
 
 export async function requestSignPsbt() {

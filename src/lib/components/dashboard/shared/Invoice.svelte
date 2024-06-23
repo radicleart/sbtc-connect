@@ -8,7 +8,7 @@
   import CopyClipboard from '$lib/components/common/CopyClipboard.svelte';
   import { makeFlash } from "$lib/stacks_connect";
   import { truncate, explorerBtcAddressUrl } from '$lib/utils'
-  import { sbtcConfig } from '$stores/stores'
+  import { sessionStore } from '$stores/stores'
 	import PsbtDisplay from "$lib/components/dashboard/shared/PsbtDisplay.svelte";
 	import type { PSBTHolder } from "@mijoco/stx_helpers/dist/index";
 
@@ -65,7 +65,7 @@
   }
 
   export function allowShowPsbt() {
-    return !$sbtcConfig.userSettings.useOpDrop
+    return !$sessionStore.userSettings.useOpDrop
   }
 
   export function requestShowPsbt() {

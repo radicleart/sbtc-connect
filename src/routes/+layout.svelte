@@ -7,14 +7,10 @@
 	import { afterNavigate, beforeNavigate, goto } from "$app/navigation";
 	import { page } from "$app/stores";
 	import { onMount, onDestroy } from 'svelte';
-	import { sbtcConfig } from '$stores/stores'
-	import type { SbtcConfig } from '$types/sbtc_config'
-	import { defaultSbtcConfig } from '$types/sbtc_config';
+	import { sessionStore } from '$stores/stores'
 	import { COMMS_ERROR, tsToTime } from '$lib/utils.js'
-	import { setAuthorisation } from '$lib/events_api';
-	import { getConfig } from '$stores/store_helpers';
-	import { isLoggedIn, loginStacksFromHeader, type AddressObject } from '@mijoco/stx_helpers/dist/index';
-	import { authenticate, initApplication, isLegal } from '$lib/stacks_connect';
+	import { loginStacksFromHeader } from '@mijoco/stx_helpers/dist/index';
+	import { initAddresses, initApplication, isLegal } from '$lib/stacks_connect';
 
 	let componentKey = 0;
 	let componentKey1 = 0;
@@ -45,7 +41,7 @@
 		//componentKey++;
 		console.debug('afterNavigate: ' + nav.to?.route.id + ' : ' + tsToTime(new Date().getTime()))
 	})
-	const unsubscribe = sbtcConfig.subscribe((conf) => {});
+	const unsubscribe = sessionStore.subscribe((conf) => {});
 	onDestroy(unsubscribe);
 	let inited = false;
 	let errorReason:string|undefined;
@@ -60,65 +56,28 @@
 	}
 
 	const initApp = async () => {
-		await initApplication(($sbtcConfig) ? $sbtcConfig : defaultSbtcConfig as SbtcConfig, undefined);
-		if (isLoggedIn() && !$sbtcConfig.authHeader) {
-			await authenticate($sbtcConfig)
-		}
-		setAuthorisation($sbtcConfig.authHeader)
+		await initAddresses();
+		await initApplication($sessionStore.userSettings);
 	}
-
-	let resizing = false;
-	let windowWidth:string|undefined;
-	const debounce = () => {
-		let timer:any;
-		resizing = true
-		windowWidth = `${window.innerWidth}px`;
-		timer = setTimeout(() => {
-			resizing = false;
-			clearTimeout(timer);
-		}, 250);
-	};
-	//const debouncedSetWindowWidth = debounce(300);
 
 	onMount(async () => {
 		try {
-			const conf = $sbtcConfig;
-			if (!conf.keySets) {
-				if (getConfig().VITE_NETWORK === 'testnet') {
-					conf.keySets = { 'testnet': {} as AddressObject };
-				} else if (getConfig().VITE_NETWORK === 'devnet') {
-					conf.keySets = { 'testnet': {} as AddressObject };
-				} else {
-					conf.keySets = { 'mainnet': {} as AddressObject };
-				}
-				conf.keySets[getConfig().VITE_NETWORK] = {} as AddressObject;
-				sbtcConfig.update(() => conf);
-			}
-			inited = true;
-
 			initApp();
-			window.addEventListener('resize', debounce);
-		
+			inited = true;
 		} catch (err) {
 			errorReason = COMMS_ERROR
 			console.log(err)
 		}
 	})
 </script>
-	{#if resizing}
 	<div class="bg-gray-1000 bg-[url('$lib/assets/bg-lines.svg')] bg-cover text-white font-extralight min-h-screen">
+		{#if inited}
 		<Header on:login_event={loginEvent} />
+		<div class="min-h-[calc(100vh-160px)] mx-auto px-6">
+			{#key componentKey1}
+				<slot></slot>
+			{/key}
+		</div>
+		<Footer />
+		{/if}
 	</div>
-	{:else}
-	<div class="bg-gray-1000 bg-[url('$lib/assets/bg-lines.svg')] bg-cover text-white font-extralight min-h-screen">
-			{#if inited}
-			<Header on:login_event={loginEvent} />
-			<div class="min-h-[calc(100vh-160px)] mx-auto px-6">
-				{#key componentKey1}
-					<slot></slot>
-				{/key}
-			</div>
-			<Footer />
-			{/if}
-	</div>
-	{/if}

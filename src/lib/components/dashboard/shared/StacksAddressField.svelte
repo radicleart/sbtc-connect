@@ -2,7 +2,7 @@
   import { Icon, InformationCircle } from "svelte-hero-icons";
   import { onMount } from 'svelte';
   import { Tooltip } from 'flowbite-svelte';
-	import { sbtcConfig } from "$stores/stores";
+	import { sessionStore } from "$stores/stores";
 	import { getConfig } from "$stores/store_helpers";
 	import { verifyStacksPricipal } from "@mijoco/stx_helpers/dist/index";
 
@@ -14,7 +14,7 @@
     label: 'Stacks or Contract Address',
     hint: 'sBTC will be minted to this account or contract.',
     resetValue: '',
-    value: $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress
+    value: $sessionStore.keySets[getConfig().VITE_NETWORK].stxAddress
   }
 
   let value:string = inputData.value;
@@ -30,8 +30,8 @@
       reason = undefined;
       verifyStacksPricipal(value)
       inputData.value = value;
-      if (depositFlow) $sbtcConfig.payloadDepositData.principal = value
-      else $sbtcConfig.payloadWithdrawData.principal = value
+      if (depositFlow) $sessionStore.sbtcInfo.payloadDepositData.principal = value
+      else $sessionStore.sbtcInfo.payloadWithdrawData.principal = value
     } catch(err:any) {
       reason = err.message || 'Error - is the address a valid';
     }
@@ -40,18 +40,18 @@
     reason = undefined;
     if (depositFlow) {
       try {
-        verifyStacksPricipal($sbtcConfig.payloadDepositData.principal)
-        value = $sbtcConfig.payloadDepositData.principal!
+        verifyStacksPricipal($sessionStore.sbtcInfo.payloadDepositData.principal)
+        value = $sessionStore.sbtcInfo.payloadDepositData.principal!
       } catch (err) {
-        value = $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress
+        value = $sessionStore.keySets[getConfig().VITE_NETWORK].stxAddress
       }
     } else {
       inputData.hint = 'sBTC will be withdrawn from this account'
       try {
-        verifyStacksPricipal($sbtcConfig.payloadWithdrawData.principal)
-        value = $sbtcConfig.payloadWithdrawData.principal!
+        verifyStacksPricipal($sessionStore.sbtcInfo.payloadWithdrawData.principal)
+        value = $sessionStore.sbtcInfo.payloadWithdrawData.principal!
       } catch (err) {
-        value = $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress
+        value = $sessionStore.keySets[getConfig().VITE_NETWORK].stxAddress
       }
     }
   })

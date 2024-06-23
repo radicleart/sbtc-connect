@@ -1,41 +1,41 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Icon, ArrowUpRight } from "svelte-hero-icons"
-	import { sbtcConfig } from '$stores/stores';
+	import { sessionStore } from '$stores/stores';
 	import { truncate, explorerAddressUrl, explorerBtcAddressUrl } from '$lib/utils'
 	import { getConfig } from '$stores/store_helpers';
 
   let connected = false;
 
 	const getContractAddress = () => {
-		const contract = $sbtcConfig.sbtcContractData.contractId
+		const contract = $sessionStore.sbtcInfo.sbtcContractData.contractId
 		return truncate(contract.split('.')[0], 8) + '.' + contract.split('.')[1]
 	}
 	const getCoordinator = (full:boolean) => {
-		if ($sbtcConfig?.sbtcContractData?.coordinator) {
-			if (full) return $sbtcConfig.sbtcContractData.coordinator?.addr.value
-			return truncate($sbtcConfig?.sbtcContractData?.coordinator?.addr.value, 8)
+		if ($sessionStore?.sbtcContractData?.coordinator) {
+			if (full) return $sessionStore.sbtcInfo.sbtcContractData.coordinator?.addr.value
+			return truncate($sessionStore?.sbtcContractData?.coordinator?.addr.value, 8)
 		}
 		return 'not known'
 	}
 	const getOwner = (full:boolean) => {
-		if ($sbtcConfig?.sbtcContractData?.contractOwner) {
-			if (full) return $sbtcConfig.sbtcContractData.contractOwner
-			return truncate($sbtcConfig.sbtcContractData.contractOwner, 8)
+		if ($sessionStore?.sbtcContractData?.contractOwner) {
+			if (full) return $sessionStore.sbtcInfo.sbtcContractData.contractOwner
+			return truncate($sessionStore.sbtcInfo.sbtcContractData.contractOwner, 8)
 		}
 		return 'not known'
 	}
 	const getAddress = (full:boolean) => {
-		if ($sbtcConfig?.sbtcContractData?.sbtcWalletAddress) {
-			if (full) return $sbtcConfig.sbtcContractData.sbtcWalletAddress
-			return truncate($sbtcConfig.sbtcContractData.sbtcWalletAddress, 8).toUpperCase()
+		if ($sessionStore?.sbtcContractData?.sbtcWalletAddress) {
+			if (full) return $sessionStore.sbtcInfo.sbtcContractData.sbtcWalletAddress
+			return truncate($sessionStore.sbtcInfo.sbtcContractData.sbtcWalletAddress, 8).toUpperCase()
 		}
 		return 'not connected'
 	}
 
 
   onMount(async () => {
-    connected = typeof $sbtcConfig.sbtcContractData.contractId === 'string'
+    connected = typeof $sessionStore.sbtcInfo.sbtcContractData.contractId === 'string'
   })
 </script>
 
@@ -58,7 +58,7 @@
   </p>
   <div class="flex bg-black rounded-xl text-white px-4 py-1 font-normal">{getContractAddress()}</div>
   <div class="ml-auto flex items-start">
-    <a title="Show in Explorer" href={explorerAddressUrl($sbtcConfig.sbtcContractData.contractId)} target="_blank" class="h-8 w-8 rounded-md bg-black flex items-center justify-center border border-transparent hover:border-gray-900 transition duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500/50">
+    <a title="Show in Explorer" href={explorerAddressUrl($sessionStore.sbtcInfo.sbtcContractData.contractId)} target="_blank" class="h-8 w-8 rounded-md bg-black flex items-center justify-center border border-transparent hover:border-gray-900 transition duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500/50">
       <Icon src="{ArrowUpRight}" mini class="h-5 w-5 text-white" aria-hidden="true" />
     </a>
   </div>

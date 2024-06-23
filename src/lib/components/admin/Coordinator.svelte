@@ -2,7 +2,7 @@
   import { setsBTCPublicKey } from "$lib/sbtc_admin.js";
   import MintTokens from './MintTokens.svelte'
   import BurnTokens from './BurnTokens.svelte'
-  import { sbtcConfig } from '$stores/stores'
+  import { sessionStore } from '$stores/stores'
   import Button from '../shared/Button.svelte';
 	import TransactionAnalysis from './TransactionAnalysis.svelte';
   
@@ -13,15 +13,15 @@
   let burning = false;
   let proofs = true;
   
-  let romeoPublicKey = $sbtcConfig.sbtcContractData.sbtcWalletPublicKey || '02aaed53527e3771645a050568a3cc9820361899c36f689cac15b57cc7885f3ca1';
-  if ($sbtcConfig && $sbtcConfig.sbtcContractData) {
-    const s = $sbtcConfig.sbtcContractData
+  let romeoPublicKey = $sessionStore.sbtcInfo.sbtcContractData.sbtcWalletPublicKey || '02aaed53527e3771645a050568a3cc9820361899c36f689cac15b57cc7885f3ca1';
+  if ($sessionStore && $sessionStore.sbtcInfo.sbtcContractData) {
+    const s = $sessionStore.sbtcInfo.sbtcContractData
     //coordinator = s.coordinator?.addr?.value || '';
     //romeoPublicKey = s.sbtcWalletAddress;
   }
   
   const wallet = async () => {
-    const res:any = await setsBTCPublicKey($sbtcConfig.sbtcContractData.contractId, romeoPublicKey);
+    const res:any = await setsBTCPublicKey($sessionStore.sbtcInfo.sbtcContractData.contractId, romeoPublicKey);
     if (res && res.error) errorReason = res.reason
     console.log(res)
   }

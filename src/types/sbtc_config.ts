@@ -1,26 +1,6 @@
 import type { AddressObject, AuthorisationDataType, BridgeTransactionType, DepositPayloadUIType, ExchangeRate, SbtcContractDataType, WithdrawPayloadUIType } from "@mijoco/stx_helpers/dist/index";
 
-export type SbtcConfig = {
-  exchangeRates?: Array<ExchangeRate>;
-  pegInMongoId?: string;
-  pegOutMongoId?: string;
-  btcFeeRates?: any;
-  loggedIn: boolean;
-  authHeader?:AuthorisationDataType|undefined;
-  keySets: { [key: string]: AddressObject; };
-  stxAddress?: string;
-  sigData:any;
-  pegIn:boolean;
-  peginRequest?:BridgeTransactionType;
-  userSettings:SbtcUserSettingI;
-  sbtcContractData: SbtcContractDataType;
-  revealFeeWithGas: number;
-  payloadDepositData: DepositPayloadUIType;
-  payloadWithdrawData: WithdrawPayloadUIType;
-};
-export const defaultSbtcConfig:SbtcConfig = {
-  pegIn: true,
-  loggedIn: false,
+export const defaultSbtcConfig:SessionStore = {
   sigData: undefined,
   sbtcContractData: {} as SbtcContractDataType,
   userSettings: {
@@ -43,7 +23,6 @@ export const defaultSbtcConfig:SbtcConfig = {
     peggingIn: false
   },
   keySets: {},
-  revealFeeWithGas: 0,
   payloadDepositData: {
     principal: '',
     bitcoinAddress: '',
@@ -60,18 +39,5 @@ export const defaultSbtcConfig:SbtcConfig = {
     sbtcWalletPublicKey: '',
     reclaimPublicKey: '',
     paymentPublicKey: ''
-  }
-}
-
-
-export type SbtcUserSettingI = {
-  peggingIn: boolean;
-  useOpDrop: boolean;
-  debugMode: boolean;
-  testAddress?: string;
-  currency: {
-    cryptoFirst: boolean;
-    myFiatCurrency: ExchangeRate;
-    denomination: string;
   }
 }

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { sbtcConfig } from '$stores/stores';
+	import { sessionStore } from '$stores/stores';
   import { Skeleton, Tabs, TabItem } from 'flowbite-svelte';
   import { page } from "$app/stores";
 	import DepositReturn from './DepositReturn.svelte';
@@ -13,40 +13,40 @@
   let inited = false;
   let connected = false;
 
-  $: opDrop = $sbtcConfig.userSettings.useOpDrop;
-  let useDeposit = $sbtcConfig.userSettings.peggingIn;
+  $: opDrop = $sessionStore.userSettings.useOpDrop;
+  let useDeposit = $sessionStore.userSettings.peggingIn;
   if ($page.route.id === '/withdrawals') useDeposit = false
 
   const toggle = () => {
-    $sbtcConfig.userSettings.peggingIn = !$sbtcConfig.userSettings.peggingIn;
-    sbtcConfig.update(() => $sbtcConfig)
+    $sessionStore.userSettings.peggingIn = !$sessionStore.userSettings.peggingIn;
+    sessionStore.update(() => $sessionStore)
   }
 
   const initData = () => {
-    if (!$sbtcConfig.payloadDepositData.amountSats) {
-      $sbtcConfig.payloadDepositData.amountSats = 10000
+    if (!$sessionStore.sbtcInfo.payloadDepositData.amountSats) {
+      $sessionStore.sbtcInfo.payloadDepositData.amountSats = 10000
     }
-    if (!$sbtcConfig.payloadDepositData.principal) {
-      $sbtcConfig.payloadDepositData.principal = $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress
+    if (!$sessionStore.sbtcInfo.payloadDepositData.principal) {
+      $sessionStore.sbtcInfo.payloadDepositData.principal = $sessionStore.keySets[getConfig().VITE_NETWORK].stxAddress
     }
-    if (!$sbtcConfig.payloadDepositData.bitcoinAddress) {
-      $sbtcConfig.payloadDepositData.bitcoinAddress = $sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinal
+    if (!$sessionStore.sbtcInfo.payloadDepositData.bitcoinAddress) {
+      $sessionStore.sbtcInfo.payloadDepositData.bitcoinAddress = $sessionStore.keySets[getConfig().VITE_NETWORK].cardinal
     }
-    if (!$sbtcConfig.payloadWithdrawData.amountSats) {
-      $sbtcConfig.payloadWithdrawData.amountSats = 10000
+    if (!$sessionStore.sbtcInfo.payloadWithdrawData.amountSats) {
+      $sessionStore.sbtcInfo.payloadWithdrawData.amountSats = 10000
     }
-    if (!$sbtcConfig.payloadWithdrawData.principal) {
-      $sbtcConfig.payloadWithdrawData.principal = $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress
+    if (!$sessionStore.sbtcInfo.payloadWithdrawData.principal) {
+      $sessionStore.sbtcInfo.payloadWithdrawData.principal = $sessionStore.keySets[getConfig().VITE_NETWORK].stxAddress
     }
-    if (!$sbtcConfig.payloadWithdrawData.bitcoinAddress) {
-      $sbtcConfig.payloadWithdrawData.bitcoinAddress = $sbtcConfig.keySets[getConfig().VITE_NETWORK].cardinal
+    if (!$sessionStore.sbtcInfo.payloadWithdrawData.bitcoinAddress) {
+      $sessionStore.sbtcInfo.payloadWithdrawData.bitcoinAddress = $sessionStore.keySets[getConfig().VITE_NETWORK].cardinal
     }
-    sbtcConfig.update(() => $sbtcConfig)
+    sessionStore.update(() => $sessionStore)
   }
 
   onMount(async () => {
     try {
-      connected = typeof $sbtcConfig.sbtcContractData.contractId === 'string'
+      connected = typeof $sessionStore.sbtcInfo.sbtcContractData.contractId === 'string'
       initData()
       inited = true;
     } catch(err:any) {

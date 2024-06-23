@@ -6,7 +6,7 @@ import { hex } from '@scure/base';
 import { onMount } from 'svelte';
 import { sha256 } from '@noble/hashes/sha256';
 import { bitcoinToSats, explorerAddressUrl } from '$lib/utils';
-import { sbtcConfig } from '$stores/stores'
+import { sessionStore } from '$stores/stores'
 import { getConfig } from '$stores/store_helpers';
 	import { generateMerkleRoot, generateMerkleTree, getParametersForProof } from '$lib/merkle_utils';
 	import { payloadParseTransaction } from '$lib/revealer_api';
@@ -51,7 +51,7 @@ let merkleRootCheck = false;
 let inited = false;
 let functionName:string;
 
-const coordinator = (isLoggedIn() && $sbtcConfig.keySets[getConfig().VITE_NETWORK]) ? isCoordinator($sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress) : undefined;
+const coordinator = (isLoggedIn() && $sessionStore.keySets[getConfig().VITE_NETWORK]) ? isCoordinator($sessionStore.keySets[getConfig().VITE_NETWORK].stxAddress) : undefined;
 
 const getProofTuple = function () {
   const entryList = [];
@@ -187,7 +187,7 @@ const mintTo = async () => {
     'tx-index': parameters.txIndex,
   }
 
-  const res = await romeoMintTo($sbtcConfig.sbtcContractData.contractId, amount, prin!, tx.txid, parameters.height, getProofsAsCV(), parameters.txIndex, parameters.headerHex)
+  const res = await romeoMintTo($sessionStore.sbtcInfo.sbtcContractData.contractId, amount, prin!, tx.txid, parameters.height, getProofsAsCV(), parameters.txIndex, parameters.headerHex)
   console.log(res)
 }
 
@@ -203,7 +203,7 @@ const withdrawTo = async () => {
     'tx-index': parameters.txIndex,
   }
 
-  const res = await romeoWithdrawTo($sbtcConfig.sbtcContractData.contractId, amount, prin!, tx.txid, parameters.height, getProofsAsCV(), parameters.txIndex, parameters.headerHex)
+  const res = await romeoWithdrawTo($sessionStore.sbtcInfo.sbtcContractData.contractId, amount, prin!, tx.txid, parameters.height, getProofsAsCV(), parameters.txIndex, parameters.headerHex)
   console.log(res)
 }
 
@@ -230,7 +230,7 @@ onMount(async () => {
 
   proofString = parameters.proofElements.map(({ hash }) => hash).join(' ')
   amount = bitcoinToSats(tx.vout[1].value)
-  stxAddress = $sbtcConfig.keySets[getConfig().VITE_NETWORK].stxAddress
+  stxAddress = $sessionStore.keySets[getConfig().VITE_NETWORK].stxAddress
   answer = undefined
   inited = true;
 })

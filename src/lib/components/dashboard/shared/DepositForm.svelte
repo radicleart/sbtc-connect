@@ -3,10 +3,10 @@
 	import BitcoinInput from '$lib/components/dashboard/shared/BitcoinInput.svelte';
 	import StacksAddressField from '$lib/components/dashboard/shared/StacksAddressField.svelte';
 	import BitcoinAddressField from '$lib/components/dashboard/shared/BitcoinAddressField.svelte';
-	import { sbtcConfig } from '$stores/stores';
+	import { sessionStore } from '$stores/stores';
 
   export let showAddresses = false;
-  let opReturn = !$sbtcConfig.userSettings.useOpDrop
+  let opReturn = !$sessionStore.userSettings.useOpDrop
 
   onMount(async () => {
   })
