@@ -1,7 +1,8 @@
 import { writable } from 'svelte/store';
 import { config } from '$lib/config';
+import type { Config } from '@sveltejs/kit';
 
-const initialConfig = config.mainnet;
+const initialConfig = (config) ? config.devnet : {} as Config;
 
 export const configStore = writable(initialConfig);
 
@@ -14,4 +15,13 @@ export function setConfigByUrl(search:URLSearchParams) {
       network = search.get('chain') || 'mainnet'
   }
   switchConfig(network)
+}
+
+export function setConfig(network:string|null) {
+  if (!network) {
+      switchConfig('devnet');
+  } else {
+      switchConfig(network);
+  }
+
 }

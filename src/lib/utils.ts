@@ -5,10 +5,18 @@ import { hex } from '@scure/base';
 import { hash160 } from '@stacks/transactions';
 import { hashSha256Sync } from '@stacks/encryption';
 import { CommitmentStatus, MAGIC_BYTES_MAINNET, MAGIC_BYTES_TESTNET, RevealerTxModes, RevealerTxTypes, type AddressMempoolObject, type SbtcClarityEvent } from '@mijoco/stx_helpers/dist/index';
+import type { HeaderLink } from '$types/local_types';
 
 export const COMMS_ERROR = 'Error communicating with the server. Please try later.'
 export const smbp = 900
 export const xsbp = 700
+
+export function addRouterInfo(headerLinks:Array<HeaderLink>, routeId:string) {
+  const links = getConfig().VITE_HEADER_LINKS;
+  const link = links.find((o:any) => routeId === o.name)
+  if (link) headerLinks.push(link)
+}
+
 
 const formatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -137,7 +145,7 @@ export function fmtAmount(amount:number, currency:string) {
 }
 
 export function fmtNumber(amount:number|undefined) {
-  if (amount === 0) return 0;
+  if (amount === 0) return '0.0';
   if (amount) return new Intl.NumberFormat().format(amount);
 }
 

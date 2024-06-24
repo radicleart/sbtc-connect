@@ -1,7 +1,7 @@
 /**
  * sbtc - interact with Stacks Blockchain to read sbtc contract info
  */
-import { getConfig } from '$stores/store_helpers';
+import { getConfig, getSession } from '$stores/store_helpers';
 import { PostConditionMode, uintCV, stringAsciiCV, bufferCVFromString, bufferCV, cvToJSON, deserializeCV, type ListCV, contractPrincipalCV, principalCV, tupleCV } from '@stacks/transactions';
 import { openContractCall } from '@stacks/connect';
 import { hex } from '@scure/base';
@@ -145,7 +145,7 @@ export async function burnFrom(contractId:string, amount:number, stxAddress: str
 }
 
 export async function callContractReadOnly(data:any) {
-  const url = getConfig().VITE_STACKS_API + '/v2/contracts/call-read/' + data.contractAddress + '/' + data.contractName + '/' + data.functionName;
+  const url = getSession().apis.stacksApi + '/v2/contracts/call-read/' + data.contractAddress + '/' + data.contractName + '/' + data.functionName;
   let val;
   try {
       const response = await fetch(url, {

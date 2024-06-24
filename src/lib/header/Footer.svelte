@@ -1,11 +1,11 @@
 <script>
-  import LogoStacks from '../components/shared/LogoStacks.svelte';
+  import LogoStacks from '$lib/assets/LogoStacks.svelte';
 </script>
 
 <div class="mx-auto flex max-w-7xl items-center !px-6 lg:px-8 py-6">
   <div class="flex items-baseline align-baseline justify-between flex-1">
     <a href="https://www.stacks.co/" class="focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary-500/50 rounded-lg">
-      <LogoStacks class="w-24 h-auto" />
+      <LogoStacks clazz={"w-24 h-auto"} />
     </a>
     <!--
     <div class="font-extralight hidden md:flex md:flex-grow">

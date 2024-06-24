@@ -2,15 +2,17 @@
 	import { onMount } from 'svelte';
 	import { Icon, InformationCircle } from "svelte-hero-icons"
 	import { Button } from 'flowbite-svelte'
-	import { setConfig } from '$lib/config';
 	import { sessionStore } from '$stores/stores';
 	import type { SessionStore } from '$types/local_types';
 	import { fetchSbtcBalance } from '$lib/stacks_connect'
 	import Banner from '$lib/components/shared/Banner.svelte';
 	import { getConfig } from '$stores/store_helpers';
-	import { switchConfig } from '$stores/stores_config';
+	import { setConfig, switchConfig } from '$stores/stores_config';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 
 	let mode = import.meta.env.MODE
+	let network = getConfig().VITE_NETWORK
     //if (!mode) mode = 'testnet'
 
 	const switchDevnet = async () => {
@@ -39,22 +41,11 @@
 		location.assign(url.search);
 	}
 
-	const toggleNetwork = async () => {
-		let net = getConfig().VITE_NETWORK;
-		if (net === 'mainnet') net = 'testnet';
-		else net = 'mainnet'
-		setConfig(net);
-		await fetchSbtcBalance($sessionStore, true);
-		sessionStore.update((conf:SessionStore) => {
-			return conf;
-		});
-		const url = new URL(location.href);
-		if (import.meta.env.MODE === 'simnet') {
-			url.searchParams.set('chain', 'testnet');
-		} else {
-			url.searchParams.set('chain', net);
-		}
-		location.assign(url.search);
+	const toggleNetwork = async (net:string) => {
+		$page.url.searchParams.delete('chain')
+		$page.url.searchParams.append('chain', net)
+		//goto($page.url)
+		location.assign($page.url);
 	}
 
   onMount(async () => {
@@ -68,7 +59,7 @@
   </p>
   <p class="text-white font-normal">
 		<span class="inline-flex bg-black rounded-xl text-white px-4 py-1 font-normal">
-      {getConfig().VITE_ENVIRONMENT}
+      {getConfig().VITE_NETWORK}
     </span>
   </p>
   <div id="po-network" class="">
@@ -89,16 +80,23 @@
 		Switch network
 	</Button>
 	-->
-	{#if mode === 'development'}
 	<div class="mt-4">
-	<Button on:click={() => switchDevnet()} class="text-center font-medium focus:ring-4 focus:outline-none items-center px-5 py-2.5 text-sm text-white focus:ring-primary-300 dark:focus:ring-primary-800 rounded-lg !bg-black !border-[0.5px] !border-gray-700">
+	{#if network !== 'devnet'}
+	<Button on:click={() => toggleNetwork('devnet')} class="text-center font-medium focus:ring-4 focus:outline-none items-center px-5 py-2.5 text-sm text-white focus:ring-primary-300 dark:focus:ring-primary-800 rounded-lg !bg-black !border-[0.5px] !border-gray-700">
 		Switch to devnet
 	</Button>
-	<Button on:click={() => switchDevenv()} class="text-center font-medium focus:ring-4 focus:outline-none items-center px-5 py-2.5 text-sm text-white focus:ring-primary-300 dark:focus:ring-primary-800 rounded-lg !bg-black !border-[0.5px] !border-gray-700">
-		Switch to devenv (shared devnet)
-	</Button>
-	</div>
 	{/if}
+	{#if network !== 'testnet'}
+	<Button on:click={() => toggleNetwork('testnet')} class="text-center font-medium focus:ring-4 focus:outline-none items-center px-5 py-2.5 text-sm text-white focus:ring-primary-300 dark:focus:ring-primary-800 rounded-lg !bg-black !border-[0.5px] !border-gray-700">
+		Switch to testnet
+	</Button>
+	{/if}
+	{#if network !== 'mainnet'}
+	<Button on:click={() => toggleNetwork('mainnet')} class="text-center font-medium focus:ring-4 focus:outline-none items-center px-5 py-2.5 text-sm text-white focus:ring-primary-300 dark:focus:ring-primary-800 rounded-lg !bg-black !border-[0.5px] !border-gray-700">
+		Switch to mainnet
+	</Button>
+	{/if}
+	</div>
   </div>
 
 

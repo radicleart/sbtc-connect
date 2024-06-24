@@ -1,10 +1,10 @@
-import { getConfig } from '$stores/store_helpers';
+import { getConfig, getSession } from '$stores/store_helpers';
 import type { UIObject } from '$types/sbtc_ui_types';
 import { headers } from './events_api';
 import * as btc from '@scure/btc-signer';
 import { hex } from '@scure/base';
 import type { Transaction } from '@scure/btc-signer' 
-import type { RevealerTransaction } from '@mijoco/stx_helpers/dist/index';
+import type { AddressObject, RevealerTransaction } from '@mijoco/stx_helpers/dist/index';
 
 export const MINIMUM_DEPOSIT = 1000;
 
@@ -12,7 +12,7 @@ export const MINIMUM_DEPOSIT = 1000;
  * /revealer-api/v1/transaction routes
  */
 export async function connectRevealerTransactionPayment(commitAddress:string, txId:string):Promise<RevealerTransaction|undefined> {
-  const path = getConfig().VITE_REVEALER_API + '/transactions/connect-revealer-transaction/' + commitAddress + '/' + txId;
+  const path = getSession().apis.revealerApi + '/transactions/connect-revealer-transaction/' + commitAddress + '/' + txId;
   try {
     const response = await fetch(path);
     const res = await response.json();
@@ -22,7 +22,7 @@ export async function connectRevealerTransactionPayment(commitAddress:string, tx
   }
 }
 export async function checkRevealerTransactionPayment(commitAddress:string):Promise<RevealerTransaction|undefined> {
-  const path = getConfig().VITE_REVEALER_API + '/transactions/check-revealer-transaction/' + commitAddress;
+  const path = getSession().apis.revealerApi + '/transactions/check-revealer-transaction/' + commitAddress;
   try {
     const response = await fetch(path);
     const res = await response.json();
@@ -32,7 +32,7 @@ export async function checkRevealerTransactionPayment(commitAddress:string):Prom
   }
 }
 export async function cancelRevealerTransactionPayment(commitAddress:string):Promise<RevealerTransaction|undefined> {
-  const path = getConfig().VITE_REVEALER_API + '/transactions/cancel-revealer-transaction/' + commitAddress;
+  const path = getSession().apis.revealerApi + '/transactions/cancel-revealer-transaction/' + commitAddress;
   try {
     const response = await fetch(path);
     const res = await response.json();
@@ -42,7 +42,7 @@ export async function cancelRevealerTransactionPayment(commitAddress:string):Pro
   }
 }
 export async function fetchRevealerTransactions(page:number, limit:number) {
-  const path = getConfig().VITE_REVEALER_API + '/transactions/get-revealer-transactions/' + page + '/' + limit;
+  const path = getSession().apis.revealerApi + '/transactions/get-revealer-transactions/' + page + '/' + limit;
   try {
     const response = await fetch(path);
     const res = await response.json();
@@ -53,7 +53,7 @@ export async function fetchRevealerTransactions(page:number, limit:number) {
 }
 export async function fetchRevealerTransactionsByCommitAddress(address:string) {
   if (!address || address.length < 5) return;
-  const path = getConfig().VITE_REVEALER_API + '/transactions/get-revealer-transactions-by-commit-address/' + address;
+  const path = getSession().apis.revealerApi + '/transactions/get-revealer-transactions-by-commit-address/' + address;
   try {
     const response = await fetch(path);
     const res = await response.json();
@@ -63,7 +63,7 @@ export async function fetchRevealerTransactionsByCommitAddress(address:string) {
   }
 }
 export async function fetchRevealerTransactionsByTxId(txId:string) {
-  const path = getConfig().VITE_REVEALER_API + '/transactions/get-revealer-transactions-by-txid/' + txId;
+  const path = getSession().apis.revealerApi + '/transactions/get-revealer-transactions-by-txid/' + txId;
   try {
     const response = await fetch(path);
     const res = await response.json();
@@ -74,7 +74,7 @@ export async function fetchRevealerTransactionsByTxId(txId:string) {
 }
 export async function fetchRevealerTransactionsByOriginator(address:string, page:number, limit:number) {
   if (!address || address.length < 5) return;
-  const path = getConfig().VITE_REVEALER_API + '/transactions/get-revealer-transactions-by-originator/' + address + '/' + page + '/' + limit;
+  const path = getSession().apis.revealerApi + '/transactions/get-revealer-transactions-by-originator/' + address + '/' + page + '/' + limit;
   try {
     const response = await fetch(path);
     const res = await response.json();
@@ -86,7 +86,7 @@ export async function fetchRevealerTransactionsByOriginator(address:string, page
 
 export async function fetchRevealerTransactionsPendingByOriginator(address:string) {
   if (!address || address.length < 5) return;
-  const path = getConfig().VITE_REVEALER_API + '/transactions/get-revealer-transactions-pending-by-originator/' + address;
+  const path = getSession().apis.revealerApi + '/transactions/get-revealer-transactions-pending-by-originator/' + address;
   try {
     const response = await fetch(path);
     const res = await response.json();
@@ -102,7 +102,7 @@ export async function fetchRevealerTransactionsPendingByOriginator(address:strin
  * /revealer-api/v1/sbtc routes
  */
 export async function fetchUiInit():Promise<UIObject|undefined> {
-  const path = getConfig().VITE_REVEALER_API + '/sbtc/init-ui';
+  const path = getSession().apis.revealerApi + '/sbtc/init-ui';
   try {
     const response = await fetch(path);
     const res = await response.json();
@@ -113,7 +113,7 @@ export async function fetchUiInit():Promise<UIObject|undefined> {
 }
 
 export async function fetchBitcoinTransaction(txId:string):Promise<any> {
-  const path = getConfig().VITE_REVEALER_API + '/sbtc/bitcoin/' + txId;
+  const path = getSession().apis.revealerApi + '/sbtc/bitcoin/' + txId;
   try {
     const response = await fetch(path);
     const res = await response.json();
@@ -124,7 +124,7 @@ export async function fetchBitcoinTransaction(txId:string):Promise<any> {
 }
 
 export async function fetchBitcoinBlock(blockhash:string, verbosity:number) {
-  const path = getConfig().VITE_REVEALER_API + '/sbtc/bitcoin/block/' + blockhash + '/' + verbosity;
+  const path = getSession().apis.revealerApi + '/sbtc/bitcoin/block/' + blockhash + '/' + verbosity;
   try {
     const response = await fetch(path);
     const res = await response.json();
@@ -135,7 +135,7 @@ export async function fetchBitcoinBlock(blockhash:string, verbosity:number) {
 }
 
 export async function fetchUserBalances(adrds:AddressObject) {
-  const path = getConfig().VITE_REVEALER_API + '/sbtc/address/balances/' + adrds.stxAddress + '/' + adrds.cardinal + '/' + adrds.ordinal;
+  const path = getSession().apis.revealerApi + '/sbtc/address/balances/' + adrds.stxAddress + '/' + adrds.cardinal + '/' + adrds.ordinal;
   try {
     const response = await fetch(path);
     const res = await response.json();
@@ -149,7 +149,7 @@ export async function fetchUserBalances(adrds:AddressObject) {
  * /revealer-api/v1/op_return routes
  */
 export async function getPsbtForDeposit(originator:string, recipient:string, amountSats:number, paymentPublicKey:string, paymentAddress:string, feeMultiplier:number) {
-  const path = getConfig().VITE_REVEALER_API + '/op_return/get-psbt-for-deposit';
+  const path = getSession().apis.revealerApi + '/op_return/get-psbt-for-deposit';
   try {
     const response = await fetch(path, {
       method: 'POST',
@@ -174,7 +174,7 @@ export async function getPsbtForDeposit(originator:string, recipient:string, amo
 }
 
 export async function getAddressForOpDropDeposit(originator:string, recipient:string, amountSats:number, reclaimPublicKey:string, paymentAddress:string) {
-  const path = getConfig().VITE_REVEALER_API + '/op_drop/get-commitment-address';
+  const path = getSession().apis.revealerApi + '/op_drop/get-commitment-address';
   try {
     const response = await fetch(path, {
       method: 'POST',
@@ -198,7 +198,7 @@ export async function getAddressForOpDropDeposit(originator:string, recipient:st
 }
 
 export async function getPsbtForWithdrawal(originator:string, withdrawalAddress:string, signature:string, amountSats:number, paymentPublicKey:string, paymentAddress:string, feeMultiplier:number) {
-  const path = getConfig().VITE_REVEALER_API + '/op_return/get-psbt-for-withdrawal';
+  const path = getSession().apis.revealerApi + '/op_return/get-psbt-for-withdrawal';
   try {
     const response = await fetch(path, {
       method: 'POST',
@@ -233,7 +233,7 @@ export async function broadcastDeposit(txIn: { recipient:string, amountSats:numb
     const errorReason = '<p>Unable to finalise transaction</p><p>Check you are connected to the same account as your web wallet - then click back and try again.</p>'
     throw new Error(errorReason)
   }
-  const path = getConfig().VITE_REVEALER_API + '/op_return/broadcast-deposit'
+  const path = getSession().apis.revealerApi + '/op_return/broadcast-deposit'
   const response = await fetch(path, {
     method: 'POST',
     headers: headers(),
@@ -259,7 +259,7 @@ export async function broadcastDeposit(txIn: { recipient:string, amountSats:numb
 }
 
 export async function clientBroadcastDeposit(txIn: { recipient:string, amountSats:number, paymentPublicKey:string, txId:string; }) {
-  const path = getConfig().VITE_REVEALER_API + '/op_return/update-deposit'
+  const path = getSession().apis.revealerApi + '/op_return/update-deposit'
   const response = await fetch(path, {
     method: 'POST',
     headers: headers(),
@@ -286,7 +286,7 @@ function finaliseTransaction(psbtHex:string) {
  * /revealer-api/v1/payload routes
  */
 export async function payloadParseTransaction(txid:string):Promise<any> {
-  const path = getConfig().VITE_REVEALER_API + '/payload/parse/tx/' + txid;
+  const path = getSession().apis.revealerApi + '/payload/parse/tx/' + txid;
   try {
     const response = await fetch(path);
     const res = await response.json();
@@ -297,7 +297,7 @@ export async function payloadParseTransaction(txid:string):Promise<any> {
 }
 
 export async function payloadParseDeposit(data:string):Promise<any> {
-  const path = getConfig().VITE_REVEALER_API + '/payload/parse/deposit/' + data;
+  const path = getSession().apis.revealerApi + '/payload/parse/deposit/' + data;
   try {
     const response = await fetch(path);
     const res = await response.json();
@@ -308,7 +308,7 @@ export async function payloadParseDeposit(data:string):Promise<any> {
 }
 
 export async function payloadParseWithdrawal(data:string, bitcoinAddress:string):Promise<any> {
-  const path = getConfig().VITE_REVEALER_API + '/payload/parse/withdrawal/' + data + '/' + bitcoinAddress;
+  const path = getSession().apis.revealerApi + '/payload/parse/withdrawal/' + data + '/' + bitcoinAddress;
   try {
     const response = await fetch(path);
     const res = await response.json();

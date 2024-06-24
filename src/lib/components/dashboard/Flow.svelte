@@ -8,6 +8,7 @@
 	import { onMount } from 'svelte';
 	import { getConfig } from '$stores/store_helpers';
   import Banner from '$lib/components/shared/Banner.svelte';
+  import { isLoggedIn } from '@mijoco/stx_helpers/dist/index';
 
   let errorMessage:string|undefined;
   let inited = false;
@@ -20,6 +21,18 @@
   const toggle = () => {
     $sessionStore.userSettings.peggingIn = !$sessionStore.userSettings.peggingIn;
     sessionStore.update(() => $sessionStore)
+  }
+
+  const getMainMessage = () => {
+    if (isLoggedIn()) {
+      if (getConfig().VITE_NETWORK !== 'devnet') {
+        return 'sBTC is not yet deployed on <strong>' + getConfig().VITE_NETWORK+ '</strong> switch to devnet (in settings) to continue'
+      } else {
+        return 'sBTC on <strong>' + getConfig().VITE_NETWORK+ '</strong>'
+      }
+    } else {
+      return 'Connect wallet to continue'
+    }
   }
 
   const initData = () => {
@@ -58,10 +71,10 @@
 
 <div class="sm:col-span-3 order-1 lg:order-2">
   <div class="flex flex-col w-full border-[0.5px] border-gray-700 rounded-lg p-6 overflow-hidden bg-gray-1000">
-    {#if !connected}
+    {#if !connected || !isLoggedIn()}
 	    <Banner
 		    bannerType={'info'}
-		    message={'sBTC wallet is not connected - go to settings and switch network. Currently on <strong>' + getConfig().VITE_NETWORK+ '</strong>!</a>'}
+		    message={getMainMessage()}
       />
     {:else}
       {#if errorMessage}

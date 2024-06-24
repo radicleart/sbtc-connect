@@ -1,17 +1,18 @@
 <script lang="ts">
-	import { Button, Dropdown, DropdownItem } from 'flowbite-svelte'
+	import { Dropdown, DropdownItem } from 'flowbite-svelte'
 	import { Icon, ClipboardDocument } from "svelte-hero-icons"
-	import LogoSBTC from '$lib/components/shared/LogoSBTC.svelte';
-	import LogoBitcoin from '$lib/components/shared/LogoBitcoin.svelte';
-	import StacksIcon from '$lib/components/shared/StacksIcon.svelte';
-	import CopyClipboard from '$lib/components/common/CopyClipboard.svelte';
-	import { makeFlash } from "$lib/stacks_connect";
-	import { getConfig } from '$stores/store_helpers';
+	import LogoSBTC from '$lib/assets/LogoSBTC.svelte';
+	import LogoBitcoin from '$lib/assets/LogoBitcoin.svelte';
+	import StacksIcon from '$lib/assets/StacksIcon.svelte';
 	import { createEventDispatcher } from "svelte";
-	import { truncate } from '$lib/utils'
-	import { sessionStore } from '$stores/stores'
-	import { fmtSatoshiToBitcoin, fmtMicroToStx, bitcoinBalanceFromMempool } from '$lib/utils'
+  	import CopyClipboard from '$lib/components/common/CopyClipboard.svelte';
+	import { makeFlash } from '$lib/stacks_connect';
+	import { truncate } from '$lib/utils';
+
 	const dispatch = createEventDispatcher();
+
+	export let account:{stxAddress:string;cardinal:string;ordinal:string;bnsNameInfo: {names: Array<string>}};
+	export let balances:{sbtcBalance?:string;cardinalBalance?:string;ordinalBalance?:string;stacksBalance?:string}
 
 	let copied = false;
 	let dropdownOpen = false;
@@ -22,8 +23,9 @@
     	//alert ('Clicked on: ' + e.target)
   	}
 
-	const copy = (event:any, ele:string, val:string) => {
+  	const copy = (event:any, ele:string, val:string) => {
 		event.stopPropagation();
+		val = (account.bnsNameInfo && account.bnsNameInfo.names && val === 'bns') ? account.bnsNameInfo.names[0] : val
 		let clippy = {
 			target: document.getElementById('clipboard')!,
 			props: { name: val },
@@ -32,11 +34,12 @@
 		app.$destroy();
 		makeFlash(document.getElementById(ele))
 		copied = true;
+		dispatch('do_copy', {event, ele, val})
 		return false;
 	}
 
 	const doLogout = () => {
-		dispatch('init_logout');
+		dispatch('do_logout');
 	}
 
 	const transformAddress = (address:string) => {
@@ -56,90 +59,97 @@
 	</svg>
 </button>
 <Dropdown
-	containerClass="z-30 rounded-lg !bg-black !border py-1 !border-gray-900"
-	placement='bottom-end'>
-	<div slot="header" class="bg-gray-1000 overflow-hidden py-1 text-white">
-		<div class="divide-y divide-gray-900">
-			<div class="pb-2">
-				<div class="px-4 py-2 font-normal">Addresses</div>
-				<div class="px-4 py-1 bg-gray-1000 grid grid-flow-col auto-cols-auto gap-6 items-center">
-					<div id="icon-stacks" class="flex items-center gap-3 text-sm">
-						<StacksIcon clazz={'w-5 h-5'}/>
-						<span>{transformAddress($sessionStore.keySets[getConfig().VITE_NETWORK].stxAddress)}</span>
-					</div>
-					<div class="ml-auto flex items-center">
-						<button on:click|preventDefault={(event) => copy(event, 'icon-stacks', $sessionStore.keySets[getConfig().VITE_NETWORK].stxAddress)} class="h-8 w-8 rounded-md bg-black flex items-center justify-center border border-transparent hover:border-gray-900 transition duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500/50">
-							<Icon on:keyup on:click={(event) => handleClick(event)} src="{ClipboardDocument}" class="h-5 w-5 text-white" aria-hidden="true" />
-						</button>
-					</div>
-				</div>
-				<div class="px-4 py-1 bg-gray-1000 grid grid-flow-col auto-cols-auto gap-6 items-center">
-					<div id="bitcoin-c-stacks" class="flex items-center gap-3 text-sm">
-						<LogoBitcoin clazz={'w-5 h-5'}/>
+containerClass="z-30 rounded-lg !bg-black !border py-1 !border-gray-900"
+placement='bottom-end'>
+<div slot="header" class="bg-gray-1000 overflow-hidden py-1 text-white">
+	<div class="divide-y divide-gray-900">
+		<div class="pb-2">
+				<div class="px-4 py-2">Addresses</div>
 
-						<span><span class="font-bold">Cardinal:</span>{' '}{transformAddress($sessionStore.keySets[getConfig().VITE_NETWORK].cardinal)}</span>
-					</div>
-					<div class="ml-auto flex items-center">
-						<button on:click|preventDefault={(event) => copy(event, 'icon-stacks', $sessionStore.keySets[getConfig().VITE_NETWORK].cardinal)} class="h-8 w-8 rounded-md bg-black flex items-center justify-center border border-transparent hover:border-gray-900 transition duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500/50">
-							<Icon src="{ClipboardDocument}" class="h-5 w-5 text-white" aria-hidden="true" />
-						</button>
+				<div class="text-sm mb-2 ">
+					<div class="px-4 py-2 flex gap-4 justify-between">
+						<div class="flex flex-col gap-3 text-sm">
+							<div id="icon-bns"><span><StacksIcon clazz={'w-5 h-5 inline mr-2'}/></span> {#if (account.bnsNameInfo?.names?.length || 0) > 0}<span>{account.bnsNameInfo?.names[0]}</span> :{/if} <span>{transformAddress(account.stxAddress)}</span></div>
+						</div>
+						<div class="flex items-center">
+							<button on:click|preventDefault={(event) => copy(event, 'icon-bns', 'bns')} class="h-8 w-8 rounded-md bg-black flex items-center justify-center border border-transparent hover:border-sand-900 transition duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500/50">
+								<Icon on:keyup on:click={(event) => handleClick(event)} src="{ClipboardDocument}" class="h-5 w-5 text-white" aria-hidden="true" />
+							</button>
+						</div>
 					</div>
 				</div>
-				<div class="px-4 py-1 bg-gray-1000 grid grid-flow-col auto-cols-auto gap-6 items-center">
-					<div id="bitcoin-o-stacks" class="flex items-center gap-3 text-sm">
-						<LogoBitcoin clazz={'w-5 h-5'}/>
 
-						<span><span class="font-bold">Ordinal:</span>{' '}{transformAddress($sessionStore.keySets[getConfig().VITE_NETWORK].ordinal)}</span>
-					</div>
-					<div class="ml-auto flex items-center">
-						<button on:click|preventDefault={(event) => copy(event, 'icon-stacks', $sessionStore.keySets[getConfig().VITE_NETWORK].ordinal)} class="h-8 w-8 rounded-md bg-black flex items-center justify-center border border-transparent hover:border-gray-900 transition duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500/50">
-							<Icon src="{ClipboardDocument}" class="h-5 w-5 text-white" aria-hidden="true" />
-						</button>
+				<div class="text-sm mb-2 ">
+					<div class="px-4 py-2 flex gap-4 justify-between">
+						<div class="flex items-center gap-3 text-sm">
+							<LogoBitcoin clazz={'w-5 h-5'}/>
+							<span id="icon-bitcoin">{transformAddress(account.cardinal)}</span>
+						</div>
+						<div class="ml-auto flex items-center">
+							<button on:click|preventDefault={(event) => copy(event, 'icon-bitcoin', account.cardinal)} class="h-8 w-8 rounded-md bg-black flex items-center justify-center border border-transparent hover:border-sand-900 transition duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500/50">
+								<Icon src="{ClipboardDocument}" class="h-5 w-5 text-white" aria-hidden="true" />
+							</button>
+						</div>
 					</div>
 				</div>
+
+				<div class="text-sm mb-2 ">
+					<div class="px-4 py-2 flex gap-4 justify-between">
+						<div id="icon-bitcoin" class="flex items-center gap-3 text-sm">
+							<LogoBitcoin clazz={'w-5 h-5'}/>
+							<span>{transformAddress(account.ordinal)}</span>
+						</div>
+						<div class="ml-auto flex items-center">
+							<button on:click|preventDefault={(event) => copy(event, 'icon-bitcoin', account.ordinal)} class="h-8 w-8 rounded-md bg-black flex items-center justify-center border border-transparent hover:border-sand-900 transition duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500/50">
+								<Icon src="{ClipboardDocument}" class="h-5 w-5 text-white" aria-hidden="true" />
+							</button>
+						</div>
+					</div>
+				</div>
+
 			</div>
 			<div>
-				<div class="mt-1 px-4 py-2 font-normal">Balances</div>
-				<div class="px-4 py-2 bg-gray-1000 grid grid-flow-col auto-cols-auto gap-4 items-center">
+				<div class="mt-1 px-4 py-2">Balances</div>
+				<div class="px-4 py-2 flex gap-4 justify-between">
 					<div class="flex items-center gap-3 text-sm">
 						<StacksIcon clazz={'w-5 h-5'}/>
-						<span class="font-bold">STX</span>
+						<span>STX</span>
 					</div>
 					<div class="ml-auto flex items-center">
-						{fmtMicroToStx($sessionStore.keySets[getConfig().VITE_NETWORK].stacksTokenInfo?.stx?.balance || 0.000000)}
+						{balances.stacksBalance}
 					</div>
 				</div>
 
-				<div class="px-4 py-2 bg-gray-1000 grid grid-flow-col auto-cols-auto gap-4 items-center">
+				<div class="px-4 py-2 flex gap-4 justify-between">
 					<div class="flex items-center gap-3 text-sm">
 						<LogoBitcoin clazz={'w-5 h-5'}/>
-						<span class="font-bold">BTC (Cardinal)</span>
+						<span>BTC</span>
 					</div>
 					<div class="ml-auto flex items-center">
-						{fmtSatoshiToBitcoin(bitcoinBalanceFromMempool($sessionStore.keySets[getConfig().VITE_NETWORK].cardinalInfo) || 0.00000000)}
+						{balances.cardinalBalance}
 					</div>
 				</div>
-				<div class="px-4 py-2 bg-gray-1000 grid grid-flow-col auto-cols-auto gap-4 items-center">
+				<div class="px-4 py-2 flex gap-4 justify-between">
 					<div class="flex items-center gap-3 text-sm">
 						<LogoBitcoin clazz={'w-5 h-5'}/>
-						<span class="font-bold">BTC (Ordinal)</span>
+						<span>BTC (Ordinals)</span>
 					</div>
 					<div class="ml-auto flex items-center">
-						{fmtSatoshiToBitcoin(bitcoinBalanceFromMempool($sessionStore.keySets[getConfig().VITE_NETWORK].ordinalInfo) || 0.00000000)}
+						{balances.ordinalBalance}
 					</div>
 				</div>
-				<div class="px-4 py-2 bg-gray-1000 grid grid-flow-col auto-cols-auto gap-4 items-center">
-					<div class="flex items-center gap-3 text-sm">
+				<div class="px-4 py-2 flex gap-4 justify-between">
+					<div class="flex gap-3 text-sm">
 						<LogoSBTC class={'w-5 h-5'}/>
-
-						<span class="font-bold">sBTC</span>
+						<span>sBTC</span>
 					</div>
 					<div class="ml-auto flex items-center">
-						{fmtSatoshiToBitcoin($sessionStore.keySets[getConfig().VITE_NETWORK].sBTCBalance || 0.00000000)}
+						{balances.sbtcBalance}
 					</div>
 				</div>
+
 			</div>
 		</div>
 	</div>
-	<DropdownItem defaultClass="px-4 py-2 text-error-500 hover:bg-gray-1000 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-500/50" on:click={() => doLogout()}>Log out</DropdownItem>
+	<DropdownItem defaultClass="px-4 py-2 text-error-500 hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-500/50" on:click={() => doLogout()}>Disconnect wallet</DropdownItem>
 </Dropdown>

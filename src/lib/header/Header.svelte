@@ -1,47 +1,49 @@
 <script lang="ts">
-	import { Navbar, NavBrand, NavLi, NavUl, NavHamburger } from 'flowbite-svelte'
-	import { createEventDispatcher, onMount } from "svelte";
-	import Brand from './Brand.svelte'
-	import { sessionStore } from '$stores/stores';
-	import { afterNavigate, goto } from "$app/navigation";
-	import { isCoordinator } from '$lib/sbtc_admin.js'
-	import AccountDropdown from './AccountDropdown.svelte'
+	import { Navbar, NavBrand, NavLi, NavUl, NavHamburger, Dropdown, DropdownItem } from 'flowbite-svelte'
+	import { createEventDispatcher } from "svelte";
+  	import { page } from '$app/stores';
+	import AccountDropdown from './AccountDropdown.svelte';
+	import Brand from './Brand.svelte';
+	import type { HeaderLink } from '$types/local_types';
 	import SettingsDropdown from './SettingsDropdown.svelte';
-	import { getConfig } from '$stores/store_helpers';
-	import { disconnect } from '@stacks/connect';
-	import { isLoggedIn, logUserOut, loginStacksFromHeader, type AddressObject, type DepositPayloadUIType, type WithdrawPayloadUIType } from '@mijoco/stx_helpers/dist/index';
+	import { isLoggedIn } from '@mijoco/stx_helpers/dist/index';
+
+	export let headerLinks: Array<HeaderLink> = [];
+	export let loggedIn = false;
+	export let heights: {stacksHeight:string; bitcoinHeight:string};
+	export let account:{stxAddress:string;cardinal:string;ordinal:string;bnsNameInfo: {names: Array<string>}};
+	export let balances:{sbtcBalance?:string;cardinalBalance?:string;ordinalBalance?:string;stacksBalance?:string}
 
 	const dispatch = createEventDispatcher();
-	const coordinator = (isLoggedIn() && $sessionStore.keySets[getConfig().VITE_NETWORK]) ? isCoordinator($sessionStore.keySets[getConfig().VITE_NETWORK].stxAddress) : undefined;
+	let component;
+
+	let dropdownOpen = false;
+
+	const handleClick = (e:any)=> {
+		e.preventDefault();
+		dropdownOpen = !dropdownOpen
+		//alert ('Clicked on: ' + e.target)
+	}
 
 	const doLogin = async () => {
-		if (isLoggedIn()) doLogout()
-		else {
-			await loginStacksFromHeader(document);
-		}
+		dispatch('do_login')
 	}
-	let componentKey = 0;
-	afterNavigate((nav) => {
-		componentKey++;
-	})
+
+	const doCopy = async (e:any) => {
+		dispatch('do_copy', e)
+	}
 
 	const doLogout = async () => {
-		logUserOut();
-		$sessionStore.sbtcInfo.payloadDepositData = {} as DepositPayloadUIType
-		$sessionStore.sbtcInfo.payloadWithdrawData = {} as WithdrawPayloadUIType
-		$sessionStore.keySets[getConfig().VITE_NETWORK] = {} as AddressObject;
-		await sessionStore.update(() => $sessionStore)
-		dispatch('login_event');
-		disconnect()
-		setTimeout(function() {
-			componentKey++;
-			goto('/')
-		}, 100)
+		dispatch('do_logout')
 	}
 
-	const getNavActiveClass = (item:string) => {
-		if (location.pathname === item) return 'font-normal text-base text-primary-500 !px-4 !py-2 rounded-lg hover:bg-white/[8%] focus:bg-white/[16%] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500/50'
-		return 'font-normal text-base text-white !px-4 !py-2 rounded-lg hover:bg-white/[8%] focus:bg-white/[16%] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500/50'
+	const switchNetwork = async (network:string) => {
+		dispatch('switch_network', {newNetwork: network})
+	}
+
+	$: getNavActiveClass = (item:string) => {
+		if ($page.route.id && $page.route.id === item) return ' text-base text-primary-500 !px-4 !py-2 rounded-lg hover:bg-white/[8%] focus:bg-white/[16%] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500/50'
+		return ' text-base !px-4 !py-2 rounded-lg hover:bg-white/[8%] focus:bg-white/[16%] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500/50'
 	}
 
 </script>
@@ -56,12 +58,11 @@
 		<Brand />
   </NavBrand>
 
-  {#key componentKey}
   <div class="hidden md:flex md:gap-2 md:order-3">
 		<SettingsDropdown />
 
 		{#if isLoggedIn()}
-			<AccountDropdown on:init_logout={() => doLogout()}/>
+			<AccountDropdown {account} {balances} on:do_logout={doLogout} on:do_copy={doCopy}/>
 		{:else}
 			<button class="inline-flex items-center gap-x-1.5 bg-primary-01 px-4 py-2 font-normal text-black rounded-lg border border-primary-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500/50 shrink-0" on:keydown on:click={doLogin}>
 				Connect wallet
@@ -84,25 +85,14 @@
 		class="order-1 md:flex-1"
 		ulClass="dark:bg-black dark:md:bg-transparent md:border-0 border border-black flex flex-col p-2 md:p-4 mt-4 md:flex-row md:mt-0 md:text-sm md:font-medium !md:space-x-4"
 	>
-	<!--
-	<NavLi nonActiveClass={getNavActiveClass('/deposit')} href="/deposit">Deposit</NavLi>
-	<NavLi nonActiveClass={getNavActiveClass('/withdraw')} href="/withdraw">Withdraw</NavLi>
-	-->
-		<NavLi nonActiveClass={getNavActiveClass('/')} href="/">Dashboard</NavLi>
-		<NavLi nonActiveClass={getNavActiveClass('/transactions')} href="/transactions">History</NavLi>
-		<NavLi nonActiveClass={getNavActiveClass('/how-it-works')} href="/how-it-works">How it works</NavLi>
-		<NavLi nonActiveClass={getNavActiveClass('/faq')} href="/faq">FAQ</NavLi>
-		{#if coordinator}
-			<NavLi nonActiveClass={getNavActiveClass('/admin')} href="/admin">Admin</NavLi>
-		{/if}
-		{#if $sessionStore.userSettings.debugMode}
-			<NavLi nonActiveClass={getNavActiveClass('/proofs')} href="/proofs">Tx Check</NavLi>
-		{/if}
+		{#each headerLinks as link}
+			<NavLi nonActiveClass={getNavActiveClass(link.href)}><a href={link.href} target={link.target || '_self'}>{link.display}</a></NavLi>
+		{/each}
 
 		<NavLi nonActiveClass="md:hidden"><SettingsDropdown /></NavLi>
 		<NavLi nonActiveClass="md:hidden ml-0 md:ml-2">
 			{#if isLoggedIn()}
-				<AccountDropdown on:init_logout={() => doLogout()}/>
+				<AccountDropdown {account} {balances} on:do_logout={doLogout} on:do_copy={doCopy}/>
 			{:else}
 				<button id="connect-wallet" class="block w-full items-center gap-x-1.5 bg-primary-01 px-4 py-2 font-normal text-black rounded-lg border border-primary-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500/50" on:keydown on:click={doLogin}>
 					Connect wallet
@@ -110,5 +100,4 @@
 			{/if}
 		</NavLi>
 	</NavUl>
-	{/key}
 </Navbar>

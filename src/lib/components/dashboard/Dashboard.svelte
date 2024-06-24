@@ -12,9 +12,9 @@
   }
   const tvl = (showFiat:boolean) => {
     if (showFiat) {
-      const currency = $sessionStore.userSettings.currency.myFiatCurrency;
+      const currency = $sessionStore.userSettings?.currency?.myFiatCurrency;
       const tvlSBTC = satsToBitcoin($sessionStore.sbtcInfo.sbtcContractData.totalSupply || 0)
-      return currency.symbol + fmtNumber(currency.fifteen * tvlSBTC || 0) + ' ' + currency.currency
+      return fmtNumber(currency.fifteen * tvlSBTC || 0) + ' ' + currency.currency
     } else {
       const tvlSBTC = satsToBitcoin($sessionStore.sbtcInfo.sbtcContractData.totalSupply || 0)
       return fmtNumber(tvlSBTC) + ' sBTC'

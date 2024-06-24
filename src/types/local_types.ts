@@ -1,6 +1,26 @@
 import type { DepositPayloadUIType, SbtcContractDataType, WithdrawPayloadUIType } from "@mijoco/stx_helpers/dist/index";
 import type { AddressObject, InFlight, ExchangeRate, PoxInfo, ProposalEvent, SbtcUserSettingI, SoloPoolData, StacksBalance, StacksInfo, ExtensionType } from "@mijoco/stx_helpers/dist/index";
 
+export type Configuration = {
+  VITE_ENVIRONMENT:string;
+  VITE_PUBLIC_APP_NAME: string;
+  VITE_PUBLIC_APP_VERSION: string;
+  VITE_NETWORK: string;
+  VITE_SBTC_COORDINATOR: string;
+  VITE_SBTC_CONTRACT_ID: string;
+  VITE_REVEALER_API: string;
+  VITE_STACKS_API: string;
+  VITE_STACKS_EXPLORER: string;
+  VITE_BSTREAM_EXPLORER: string;
+  VITE_MEMPOOL_EXPLORER: string;
+  VITE_HEADER_LINKS: Array<HeaderLink>;
+}
+
+export type ApiLink = {
+  name: string; 
+  href: string; 
+}
+
 export type SessionStore = {
   name: string;
   balances?: StacksBalance,
@@ -10,6 +30,10 @@ export type SessionStore = {
   exchangeRates: Array<ExchangeRate>
   stacksInfo: StacksInfo;
   sbtcInfo: SbtcInformation;
+  apis: {
+    revealerApi: string;
+    stacksApi: string;
+  }
 };
 
 export type SbtcInformation = {

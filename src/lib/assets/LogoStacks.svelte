@@ -1,6 +1,5 @@
 <script>
-  let clazz = '';
-  export {clazz as class};
+  export let clazz = '';
 </script>
 
 <svg class={clazz} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 124 24">

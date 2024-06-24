@@ -9,6 +9,9 @@
 	import Addresses from '$lib/components/settings/Addresses.svelte';
 	import Networks from '$lib/components/settings/Networks.svelte';
 	import type { ExchangeRate } from '@mijoco/stx_helpers/dist/index';
+	import Apis from '$lib/components/settings/Apis.svelte';
+
+  let mode = import.meta.env.MODE
 
 	const toggleSettings = (arg:string) => {
 		const conf:SessionStore = $sessionStore;
@@ -21,6 +24,7 @@
 	onMount(async () => {
 		if (typeof $sessionStore.userSettings === 'undefined') {
 			$sessionStore.userSettings = {
+				executiveTeamMember: false,
 				useOpDrop: false,
 				debugMode: false,
         peggingIn: true,
@@ -61,9 +65,16 @@
       <h1 class="text-4xl font-normal">Settings</h1>
 
       <div class="bg-gray-1000 text-white">
+
         <div class="border-b border-gray-900/50 pt-6 pb-8">
           <Networks />
         </div>
+
+        {#if mode === 'devnet'}
+        <div class="border-b border-gray-900/50 pt-6 pb-8">
+          <Apis />
+        </div>
+        {/if}
 
         <div class="border-b border-gray-900/50 pt-6 pb-8">
           <Currencies />

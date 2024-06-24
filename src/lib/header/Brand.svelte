@@ -1,5 +1,5 @@
 <script lang="ts">
-	import LogoSBTC from '../components/shared/LogoSBTC.svelte'
+	import LogoSBTC from '$lib/assets/LogoSBTC.svelte'
 </script>
 
 <div class="flex items-center gap-3 mr-4 flex-no-wrap">
