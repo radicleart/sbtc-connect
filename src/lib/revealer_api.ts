@@ -281,6 +281,17 @@ function finaliseTransaction(psbtHex:string) {
   }
 }
 
+export async function fetchExchangeRates() {
+  const path = `${getConfig().VITE_REVEALER_API}/revealer-api/v1/btc/tx/rates`;
+  try {
+    const response = await fetch(path);
+    const res = await response.json();
+    return res;
+  } catch(err) {
+    return undefined;
+  }
+}
+
 
 /**
  * /revealer-api/v1/payload routes

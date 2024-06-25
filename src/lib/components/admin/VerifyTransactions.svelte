@@ -176,7 +176,6 @@ const verifyMerkleProof = async () => {
 }
 
 const mintTo = async () => {
-  //const dataPayload = parsePayloadFromTransaction(getConfig().VITE_NETWORK, tx.hex)
   let prin = data.stacksAddress;
   if (typeof (data.lengthOfCname) === 'number' && data.lengthOfCname > 0) prin += '.' + data.cname
   contractParameters = {
@@ -192,7 +191,6 @@ const mintTo = async () => {
 }
 
 const withdrawTo = async () => {
-  //const dataPayload = parsePayloadFromTransaction(getConfig().VITE_NETWORK, tx.hex)
   let prin = data.stacksAddress;
   if (typeof (data.lengthOfCname) === 'number' && data.lengthOfCname > 0) prin += '.' + data.cname
   contractParameters = {

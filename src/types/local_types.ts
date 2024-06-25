@@ -11,6 +11,7 @@ export type Configuration = {
   VITE_REVEALER_API: string;
   VITE_STACKS_API: string;
   VITE_STACKS_EXPLORER: string;
+  VITE_MEMPOOL_API: string;
   VITE_BSTREAM_EXPLORER: string;
   VITE_MEMPOOL_EXPLORER: string;
   VITE_HEADER_LINKS: Array<HeaderLink>;

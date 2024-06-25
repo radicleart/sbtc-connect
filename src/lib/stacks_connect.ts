@@ -8,8 +8,8 @@ import { hex } from '@scure/base';
 import { AddressPurpose, BitcoinNetworkType, getAddress } from 'sats-connect'
 import type { GetAddressOptions } from 'sats-connect'
 import { StacksMessageType, publicKeyFromSignatureVrs } from '@stacks/transactions';
-import { fetchUserBalances } from './revealer_api';
-import { fetchExchangeRates, fetchStacksInfo, getPoxInfo, getStacksAddressFromPubkey, getStacksNetwork, getTokenBalances, getWalletBalances, isLoggedIn, type AddressObject, type DepositPayloadUIType, type ExchangeRate, type PoxInfo, type SbtcContractDataType, type SbtcUserSettingI, type StacksInfo, type WithdrawPayloadUIType } from '@mijoco/stx_helpers/dist/index';
+import { fetchExchangeRates, fetchUserBalances } from './revealer_api';
+import { fetchStacksInfo, getPoxInfo, getStacksAddressFromPubkey, getStacksNetwork, getTokenBalances, getWalletBalances, isLoggedIn, type AddressObject, type DepositPayloadUIType, type ExchangeRate, type PoxInfo, type SbtcContractDataType, type SbtcUserSettingI, type StacksInfo, type WithdrawPayloadUIType } from '@mijoco/stx_helpers/dist/index';
 import { tsToDate } from './utils';
 
 const appConfig = new AppConfig(['store_write', 'publish_data']);
@@ -372,7 +372,7 @@ export async function initApplication(userSettings?:SbtcUserSettingI) {
 		}
 		const stacksInfo = await fetchStacksInfo(stacksApi) || {} as StacksInfo;
 		const poxInfo = await getPoxInfo(stacksApi)
-		const exchangeRates = await fetchExchangeRates(ecoApi);
+		const exchangeRates = await fetchExchangeRates();
 		const rateNow = exchangeRates?.find((o:any) => o.currency === 'USD') || defaultExchangeRate();
 		settings.currency.myFiatCurrency = rateNow
 		sessionStore.update((conf:SessionStore) => {
@@ -393,7 +393,7 @@ export async function initApplication(userSettings?:SbtcUserSettingI) {
 				const contractId = getConfig().VITE_SBTC_CONTRACT_ID;
 				obj.tokenBalances = await getTokenBalances(stacksApi, obj.stxAddress)
 				obj.sBTCBalance = Number(obj.tokenBalances?.fungible_tokens[contractId + '::sbtc']?.balance || 0)
-				obj.walletBalances = await getWalletBalances(ecoApi, obj.stxAddress, obj.cardinal, obj.ordinal)
+				obj.walletBalances = await getWalletBalances(getConfig().VITE_STACKS_API, getConfig().VITE_MEMPOOL_API, obj.stxAddress, obj.cardinal, obj.ordinal)
 
 				sessionStore.update((conf:SessionStore) => {
 					conf.keySets[getConfig().VITE_NETWORK] = obj

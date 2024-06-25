@@ -11,6 +11,7 @@ export const config: { [key: string]: Configuration } = {
         VITE_REVEALER_API: 'http://localhost:4040/revealer-api/v1',
         VITE_STACKS_API: 'http://localhost:3999',
         VITE_STACKS_EXPLORER: 'http://localhost:8000',
+        VITE_MEMPOOL_API: 'http://localhost:18443',
         VITE_BSTREAM_EXPLORER: 'http://localhost:8000',
         VITE_MEMPOOL_EXPLORER: 'http://localhost:8000',
         VITE_HEADER_LINKS: [
@@ -31,6 +32,7 @@ export const config: { [key: string]: Configuration } = {
         VITE_REVEALER_API: 'https://testnet.stx.eco/revealer-api/v1',
         VITE_STACKS_API: 'https://api.testnet.hiro.so',
         VITE_STACKS_EXPLORER: 'https://explorer.hiro.so',
+        VITE_MEMPOOL_API: 'https://mempool.space/testnet/api',
         VITE_BSTREAM_EXPLORER: 'https://mempool.space/testnet',
         VITE_MEMPOOL_EXPLORER: 'https://mempool.space/testnet/api',
         VITE_HEADER_LINKS: [
@@ -51,6 +53,7 @@ export const config: { [key: string]: Configuration } = {
         VITE_REVEALER_API: 'https://api.stx.eco/revealer-api/v1',
         VITE_STACKS_API: 'https://api.hiro.so',
         VITE_STACKS_EXPLORER: 'https://explorer.hiro.so',
+        VITE_MEMPOOL_API: 'https://mempool.space/api',
         VITE_BSTREAM_EXPLORER: 'https://mempool.space',
         VITE_MEMPOOL_EXPLORER: 'https://mempool.space/api',
         VITE_HEADER_LINKS: [
